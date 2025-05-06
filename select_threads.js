@@ -49,4 +49,17 @@ function getThreadById(id, callback) {
   db.close();
 }
 
-export { getAllThreads, getAllThreadIds, getThreadById };
+function sortThreadsbyCategory(category, callback) {
+  const db = connectToDatabase();
+  db.all("SELECT * FROM Threads WHERE category = ?", [category], (err, rows) => {
+    if (err) {
+      console.error("Erreur lors de l'exécution de la requête:", err.message);
+      callback(err, null);
+      return;
+    }
+    callback(null, rows);
+  });
+  db.close();
+}
+
+export { getAllThreads, getAllThreadIds, getThreadById, sortThreadsbyCategory };
