@@ -20,7 +20,8 @@
             </ul>
         </nav>
 
-        <button onclick="get-threads-btn">Get threads</button>
+        <button onclick="getAllThreads()">Test Get Thread</button>
+        <button onclick="getAllThreadsIds()">Test Get Thread Ids</button>
         
             
         <div class="container">
@@ -72,14 +73,9 @@
                 </div>
             </div>
         </div>
-        <script type="module">
-            import { getAllThreads } from '../js/select_threads.js';
-        
-        // Ajouter un event listener au bouton
-        document.getElementById('get-threads-btn').addEventListener('click', () => {
-            getAllThreads();
-        });
-        </script>
+        <script src="../js/show.js"></script>
+
+
 
 
     </body>
