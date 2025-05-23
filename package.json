@@ -2,16 +2,9 @@
   "name": "forum",
   "version": "1.0.0",
   "description": "",
-<<<<<<< HEAD
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "start": "node index.js"
-=======
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
->>>>>>> origin/JavaScript
   },
   "repository": {
     "type": "git",
@@ -25,13 +18,10 @@
   },
   "homepage": "https://github.com/Homerofsteel/FORUM#readme",
   "dependencies": {
-<<<<<<< HEAD
-=======
     "3": "^2.1.0",
     "bcrypt": "^6.0.0",
     "express": "^5.1.0",
     "sqlite": "^5.1.1",
->>>>>>> origin/JavaScript
     "sqlite3": "^5.1.7"
   }
 }
