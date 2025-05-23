@@ -58,4 +58,15 @@ function getThreadsbyCategory(category, callback) {
   });
 }
 
-module.exports = { getAllThreads, getAllThreadIds, getThreadById, getThreadsbyCategory };
+function createThread(title, category, description, callback) {
+  const query = "INSERT INTO Threads (Title, Category, Description, [Upvotes-Number], Date) VALUES (?, ?, ?,?,?)";
+  db.run(query, [title, category, description, 0, Date.now()], function(err) {
+    if (err) return callback(err);
+    callback(null, { id: this.lastID });
+  });
+
+  db.close();
+}
+
+
+module.exports = { getAllThreads, getAllThreadIds, getThreadById, getThreadsbyCategory, createThread };

@@ -1,0 +1,70 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum - Home</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/home.css">
+</head>
+
+<body>
+    <header class="header">
+        <a href="#" class="logo">Lucas</a>
+    </header>
+    <div class="stylebar"></div>
+    <nav class="navbar">
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Login</a></li>
+        </ul>
+    </nav>
+
+    <button onclick="window.location.href='home.html'">Create Thread</button>
+
+<form id="threadform" method="post">
+    <label for="Title">Title</label>
+    <input type="text" id="Title" name="title" placeholder="Your title..">
+
+    <label for="Category">Category</label>
+        <select name="category" id="Category">
+        <option value="sports">Sports</option>
+        <option value="social">Social</option>
+        <option value="politique">Politique</option>
+        <option value="gaming">Gaming</option>
+  </select>
+
+    <label for="description">Description</label>
+    <input type="text" id="Description" name="description" placeholder="Your description..">
+  
+    <input type="submit" value="Submit">
+  </form>
+</body>
+<script>
+    document.getElementById('threadform').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const title = document.getElementById('Title').value;
+  const category = document.getElementById('Category').value;
+  const description = document.getElementById('Description').value;
+
+  fetch('../../api/create-thread', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, category, description })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert("Thread créé avec succès !");
+      } else {
+        alert("Erreur lors de la création du thread.");
+      }
+    })
+    .catch(err => {
+      console.error("Erreur fetch :", err);
+    });
+});
+</script>
+</html>
