@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('node:path');
-const { getAllThreads, getAllThreadIds, getThreadById, sortThreadsbyCategory } = require('./public/js/select_threads.js');
+const { getAllThreads, getAllThreadIds, getThreadById, getThreadsbyCategory } = require('./public/js/select_threads.js');
 
 const app = express();
 const PORT = 3000;
@@ -27,6 +27,16 @@ app.get('/api/threadsids', (req, res) => {
       res.status(500).json({ error: 'Erreur lors de la récupération des IDs' });
     } else {
       res.json(ids);
+    }
+  });
+});
+
+app.get('/api/threadsbycategory', (req, res) => {
+  getAllThreads((err, threads) => {
+    if (err) {
+      res.status(500).json({ error: 'Erreur lors de la récupération des threads par categorie' });
+    } else {
+      res.json(threads);
     }
   });
 });

@@ -47,7 +47,7 @@ function getThreadById(id, callback) {
 }
 
 // Trie les threads par catégorie
-function sortThreadsbyCategory(category, callback) {
+function getThreadsbyCategory(category, callback) {
   db.all("SELECT * FROM Threads WHERE category = ?", [category], (err, rows) => {
     if (err) {
       console.error("Erreur lors de l'exécution de la requête sortThreadsbyCategory:", err.message);
@@ -58,4 +58,4 @@ function sortThreadsbyCategory(category, callback) {
   });
 }
 
-module.exports = { getAllThreads, getAllThreadIds, getThreadById, sortThreadsbyCategory };
+module.exports = { getAllThreads, getAllThreadIds, getThreadById, getThreadsbyCategory };
