@@ -6,6 +6,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.static('public'));
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'));
@@ -30,6 +31,20 @@ app.get('/api/threadsids', (req, res) => {
     }
   });
 });
+
+app.post('/api/report', (req, res) => {
+  const { userId, postId, reason } = req.body;
+
+  const query = `INSERT INTO reports (user_id, post_id, reason) VALUES (?, ?, ?)`;
+  db.run(query, [userId, postId, reason], function(err) {
+    if (err) {
+      res.status(500).json({ error: 'Erreur lors de la création du signalement' });
+    } else {
+      res.status(200).json({ message: 'Signalement créé avec succès', reportId: this.lastID });
+    }
+  });
+});
+
 
 app.get('/api/threadsbycategory', (req, res) => {
   getAllThreads((err, threads) => {

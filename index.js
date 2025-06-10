@@ -8,7 +8,7 @@ const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, (err) => {
   }
   console.log("Connexion à la base de données réussie");
 
-  // 1. Créer la table
+  // 1. Créer la table users
   db.run(`DROP TABLE IF EXISTS users`);
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,6 +21,22 @@ const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, (err) => {
       return;
     }
     console.log("Table users prête.");
+
+    // Ajoutez cette partie après la création de la table `users`
+    db.run(`CREATE TABLE IF NOT EXISTS reports (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      post_id INTEGER,
+      reason TEXT,
+      FOREIGN KEY(user_id) REFERENCES users(id),
+      FOREIGN KEY(post_id) REFERENCES posts(id)
+    )`, (err) => {
+      if (err) {
+        console.error("Erreur CREATE reports:", err.message);
+        return;
+      }
+      console.log("Table reports prête.");
+    });
 
     // 2. Insérer un utilisateur
     db.run(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`,
