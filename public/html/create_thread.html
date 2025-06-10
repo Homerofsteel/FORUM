@@ -21,25 +21,24 @@
         </ul>
     </nav>
 
-    <button onclick="window.location.href='home.html'">Create Thread</button>
+<form id="threadform" method="post" style="max-width: 500px; margin: auto;">
+  <label for="Title">Title</label><br>
+  <input type="text" id="Title" name="title" placeholder="Your title..." style="width: 100%; padding: 8px; margin-bottom: 10px;"><br>
 
-<form id="threadform" method="post">
-    <label for="Title">Title</label>
-    <input type="text" id="Title" name="title" placeholder="Your title..">
+  <label for="Category">Category</label><br>
+  <select name="category" id="Category" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+    <option value="sports">Sports</option>
+    <option value="social">Social</option>
+    <option value="politique">Politique</option>
+    <option value="gaming">Gaming</option>
+  </select><br>
 
-    <label for="Category">Category</label>
-        <select name="category" id="Category">
-        <option value="sports">Sports</option>
-        <option value="social">Social</option>
-        <option value="politique">Politique</option>
-        <option value="gaming">Gaming</option>
-  </select>
+  <label for="Description">Description</label><br>
+  <textarea id="Description" name="description" placeholder="Your description..." rows="5" style="width: 100%; padding: 8px; margin-bottom: 10px;"></textarea><br>
 
-    <label for="description">Description</label>
-    <input type="text" id="Description" name="description" placeholder="Your description..">
-  
-    <input type="submit" value="Submit">
-  </form>
+  <input type="submit" value="Submit" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
+</form>
+
 </body>
 <script>
     document.getElementById('threadform').addEventListener('submit', function (e) {
@@ -57,7 +56,13 @@
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        alert("Thread créé avec succès !");
+        const params = new URLSearchParams({
+          title: title,
+          category: category,
+          description: description
+        });
+        
+        window.location.href = `thread.html?${params.toString()}`;
       } else {
         alert("Erreur lors de la création du thread.");
       }
