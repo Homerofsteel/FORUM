@@ -28,49 +28,24 @@
             <p>Welcome to our forum! This is a place to discuss anything and everything.</p>
         </div>
         <div class="posts">
-            <div class="post">
-                <div class="votes">
-                    <div>▲</div>
-                    <div>42</div>
-                    <div>▼</div>
-                </div>
-                <div class="post-content">
-                    <h2>Welcome to our new forum!</h2>
-                    <div class="post-meta">
-                        Posted by user123 • 2 hours ago • 15 comments
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="votes">
-                    <div>▲</div>
-                    <div>28</div>
-                    <div>▼</div>
-                </div>
-                <div class="post-content">
-                    <h2>What features would you like to see?</h2>
-                    <div class="post-meta">
-                        Posted by admin • 5 hours ago • 8 comments
-                    </div>
-                </div>
-            </div>
-
-            <div class="post">
-                <div class="votes">
-                    <div>▲</div>
-                    <div>15</div>
-                    <div>▼</div>
-                </div>
-                <div class="post-content">
-                    <h2>Forum rules and guidelines</h2>
-                    <div class="post-meta">
-                        Posted by moderator • 1 day ago • 3 comments
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
+
+    <script type="module">
+        import { getAllThreads } from '../js/threadController.js';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await getAllThreads();
+            } catch (err) {
+                console.error("Erreur lors du chargement des threads:", err);
+                const postsContainer = document.querySelector('.posts');
+                postsContainer.innerHTML = '<p>Erreur lors du chargement des threads.</p>';
+            }
+        });
+    </script>
     
+
+
 </body>
 </html>

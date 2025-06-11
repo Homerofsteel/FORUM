@@ -1,72 +1,46 @@
 const sqlite3 = require('sqlite3').verbose();
-
-const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, (err) => {
-  if (err) {
-    console.error("Erreur lors de la connexion à la base de données:", err.message);
-    return;
-  }
-  console.log("Connexion à la base de données réussie");
+const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, err => {
+  if (err) return console.error("Erreur connexion DB:", err.message);
+  console.log("DB connectée");
 });
 
-// Récupère tous les threads
-function getAllThreads(callback) {
-  db.all("SELECT Title, Category FROM Threads ORDER BY [Upvotes-Number] DESC", [], (err, rows) => {
-    if (err) {
-      console.error("Erreur lors de l'exécution de la requête getAllThreads:", err.message);
-      callback(err, null);
-      return;
-    }
-    callback(null, rows);
-    db.close();
+function getAllThreads(cb) {
+  db.all('SELECT * FROM threads ORDER BY ID DESC', [], cb);
+}
+
+function getAllThreadIds(cb) {
+  db.all('SELECT ID FROM Threads', [], cb);
+}
+
+function getThreadById(id, cb) {
+  db.get('SELECT * FROM threads WHERE Id = ?', [id], (err, row) => {
+    if (err) return cb(err);
+    if (!row) return cb(null, null);
+    cb(null, {
+      id: row.id,
+      Title: row.Title,
+      Category: row.Category,
+      Description: row.Description
+    });
   });
 }
 
+function getThreadsbyCategory(category, cb) {
+  db.all('SELECT * FROM Threads WHERE category = ?', [category], cb);
+}
 
-// Récupère tous les IDs des threads
-function getAllThreadIds(callback) {
-  db.all("SELECT ID FROM Threads", [], (err, rows) => {
-    if (err) {
-      console.error("Erreur lors de l'exécution de la requête getAllThreadIds:", err.message);
-      callback(err, null);
-      return;
-    }
-    callback(null, rows);
+function createThread(title, category, description, cb) {
+  const q = 'INSERT INTO Threads (Title, Category, Description, [Upvotes-Number], Date) VALUES (?, ?, ?, ?, ?)';
+  db.run(q, [title, category, description, 0, Date.now()], function (err) {
+    if (err) return cb(err);
+    cb(null, { id: this.lastID });
   });
 }
 
-// Récupère un thread par son ID
-function getThreadById(id, callback) {
-  db.all("SELECT * FROM Threads WHERE ID = ?", [id], (err, rows) => {
-    if (err) {
-      console.error("Erreur lors de l'exécution de la requête getThreadById:", err.message);
-      callback(err, null);
-      return;
-    }
-    callback(null, rows);
-  });
-}
-
-// Trie les threads par catégorie
-function getThreadsbyCategory(category, callback) {
-  db.all("SELECT * FROM Threads WHERE category = ?", [category], (err, rows) => {
-    if (err) {
-      console.error("Erreur lors de l'exécution de la requête sortThreadsbyCategory:", err.message);
-      callback(err, null);
-      return;
-    }
-    callback(null, rows);
-  });
-}
-
-function createThread(title, category, description, callback) {
-  const query = "INSERT INTO Threads (Title, Category, Description, [Upvotes-Number], Date) VALUES (?, ?, ?,?,?)";
-  db.run(query, [title, category, description, 0, Date.now()], function(err) {
-    if (err) return callback(err);
-    callback(null, { id: this.lastID });
-  });
-
-  db.close();
-}
-
-
-module.exports = { getAllThreads, getAllThreadIds, getThreadById, getThreadsbyCategory, createThread };
+module.exports = {
+  getAllThreads,
+  getAllThreadIds,
+  getThreadById,
+  getThreadsbyCategory,
+  createThread
+};

@@ -39,37 +39,9 @@
   <input type="submit" value="Submit" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
 </form>
 
-</body>
-<script>
-    document.getElementById('threadform').addEventListener('submit', function (e) {
-  e.preventDefault();
-
-  const title = document.getElementById('Title').value;
-  const category = document.getElementById('Category').value;
-  const description = document.getElementById('Description').value;
-
-  fetch('../../api/create-thread', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, category, description })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        const params = new URLSearchParams({
-          title: title,
-          category: category,
-          description: description
-        });
-        
-        window.location.href = `thread.html?${params.toString()}`;
-      } else {
-        alert("Erreur lors de la création du thread.");
-      }
-    })
-    .catch(err => {
-      console.error("Erreur fetch :", err);
-    });
-});
+<script type="module">
+  import { CreateThread } from '../js/threadController.js';
+  CreateThread();
 </script>
-</html>
+
+</body>

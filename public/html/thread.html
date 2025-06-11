@@ -9,40 +9,49 @@
 </head>
 <body>
   <header class="header">
-    <a href="#" class="logo">Lucas</a>
-  </header>
+        <a href="#" class="logo">Lucas</a>
+    </header>
+    <div class="stylebar"></div>
+    <nav class="navbar">
+        <ul>
+            <li><a href="../html/home.html">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Login</a></li>
+        </ul>
+    </nav>
 
-  <nav>
-    <ul>
-      <li><a href="../html/home.html">Home</a></li>
-      <li><a href="#">About</a></li>
-      <li><a href="#">Contact</a></li>
-      <li><a href="#">Login</a></li>
-    </ul>
-  </nav>
-
-  <h1 id="thread-title">All Threads</h1>
+  <h1 id="thread-title">Loading</h1>
   <p><strong>Catégorie:</strong> <span id="thread-category"></span></p>
   <p><strong>Description:</strong> <span id="thread-description"></span></p>
   
   <div id="thread-container">Chargement des threads...</div>
 
-  <script>
-    window.addEventListener('DOMContentLoaded', function() {
-      const params = new URLSearchParams(window.location.search);
-      
-      const title = params.get('title');
-      const category = params.get('category');
-      const description = params.get('description');
-      
-      if (title) {
-        document.getElementById('thread-title').textContent = title;
-        document.getElementById('thread-category').textContent = category;
-        document.getElementById('thread-description').textContent = description;
-        
-        document.getElementById('thread-container').textContent = '';
-      }
-    });
-  </script>
+ <script type="module">
+import { getThreadById } from '../js/threadController.js';
+
+async function loadThread() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const threadId = params.get('id');
+
+    console.log("ID récupéré de l'URL :", threadId);
+    
+    if (!threadId) throw new Error('No thread ID provided');
+
+    const thread = await getThreadById(threadId);
+    document.getElementById('thread-title').textContent = thread.Title;
+    document.getElementById('thread-category').textContent = thread.Category;
+    document.getElementById('thread-description').textContent = thread.Description;
+    document.getElementById('thread-container').textContent = '';
+  } catch (err) {
+    console.error('Error loading thread:', err);
+    document.getElementById('thread-container').textContent = 'Error loading thread';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadThread);
+</script>
+
 </body>
 </html>
