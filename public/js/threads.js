@@ -25,8 +25,15 @@ function getThreadById(id, cb) {
   });
 }
 
-function getThreadsbyCategory(category, cb) {
-  db.all('SELECT * FROM Threads WHERE category = ?', [category], cb);
+function getThreadsbyCategory(category, callback) {
+    const query = 'SELECT * FROM threads WHERE Category = ? ORDER BY Id DESC';
+    db.all(query, [category], (err, threads) => {
+        if (err) {
+            console.error('Database error:', err);
+            return callback(err);
+        }
+        callback(null, threads);
+    });
 }
 
 function createThread(title, category, description, cb) {

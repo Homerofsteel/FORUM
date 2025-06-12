@@ -7,8 +7,6 @@ export async function getAllThreads() {
     const postsContainer = document.querySelector('.posts');
     postsContainer.innerHTML = "";
 
-    
-
     threads.forEach(thread => {
       const postElement = document.createElement('div');
       postElement.className = 'post';
@@ -25,7 +23,6 @@ export async function getAllThreads() {
           <div class="post-description">${thread.Description || 'No Description'}</div>
         </div>
       `;
-
 
       postElement.addEventListener('click', () => {
   window.location.href = `html/thread.html?id=${thread.ID}`;
@@ -62,37 +59,55 @@ export async function getAllThreads() {
     }
   }
 
-    async function getAllThreadsbyCategory() {
-        try {
-      const response = await fetch('/api/threadsbycategory');
-      const threads = await response.json();
-      console.log("Threads par catégorie récupérés :", threads);
+export async function getAllThreadsbyCategory(category) {
+    try {
+        const response = await fetch(`/api/threadsbycategory/${category}`);
+        if (!response.ok) {
+            throw new Error('Erreur réseau');
+        }
+        
+        const threads = await response.json();
+        console.log("Threads de la catégorie", category, ":", threads);
 
-      const postsContainer = document.querySelector('.posts');
-      postsContainer.innerHTML = "";
+        const postsContainer = document.querySelector('.posts');
+        postsContainer.innerHTML = "";
 
-      threads.forEach(thread => {
-        const postHTML = `
-          <div class="post">
-            <div class="votes">
-              <div>▲</div>
-              <div>0</div>
-              <div>▼</div>
-            </div>
-            <div class="post-content">
-              <h2>${thread.Title}</h2>
-              <div class="post-meta">
-                Catégorie: ${thread.Category}
-              </div>
-            </div>
-          </div>`;
-        postsContainer.insertAdjacentHTML('beforeend', postHTML);
-      });
+        if (threads.length === 0) {
+            postsContainer.innerHTML = `<p>Aucun thread trouvé dans la catégorie ${category}</p>`;
+            return;
+        }
+
+        threads.forEach(thread => {
+            const postElement = document.createElement('div');
+            postElement.className = 'post';
+            postElement.style.cursor = 'pointer';
+            postElement.innerHTML = `
+                <div class="votes">
+                    <div>▲</div>
+                    <div>0</div>
+                    <div>▼</div>
+                </div>
+                <div class="post-content">
+                    <h2>${thread.Title || 'No Title'}</h2>
+                    <div class="post-meta">| Catégorie: ${thread.Category || 'No Category'}</div>
+                    <div class="post-description">${thread.Description || 'No Description'}</div>
+                </div>
+            `;
+
+            postElement.addEventListener('click', () => {
+                window.location.href = `thread.html?id=${thread.Id}`;
+            });
+
+            postsContainer.appendChild(postElement);
+        });
 
     } catch (err) {
-      console.error("Erreur fetch threads:", err);
+        console.error("Erreur fetch threads par catégorie:", err);
+        const postsContainer = document.querySelector('.posts');
+        postsContainer.innerHTML = '<p>Erreur lors du chargement des threads.</p>';
+        throw err;
     }
-  }
+}
 
 export async function getThreadById(id) {
     try {

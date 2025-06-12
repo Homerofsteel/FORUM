@@ -43,11 +43,26 @@ app.get('/api/thread/:id', (req, res) => {
   });
 });
 
-app.get('/api/threadsbycategory', (req, res) => {
-  getAllThreads((err, threads) => {
-    if (err) return res.status(500).json({ error: 'Erreur récupération par catégorie' });
-    res.json(threads);
-  });
+app.get('/api/threadsbycategory/:category', (req, res) => {
+    const category = req.params.category;
+    
+    if (!category) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Catégorie requise' 
+        });
+    }
+
+    getThreadsbyCategory(category, (err, threads) => {
+        if (err) {
+            console.error('Error:', err);
+            return res.status(500).json({ 
+                success: false, 
+                error: 'Erreur lors de la récupération des threads' 
+            });
+        }
+        res.json(threads);
+    });
 });
 
 app.post('/api/create-thread', (req, res) => {

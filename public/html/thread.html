@@ -24,6 +24,15 @@
   <h1 id="thread-title">Loading</h1>
   <p><strong>Catégorie:</strong> <span id="thread-category"></span></p>
   <p><strong>Description:</strong> <span id="thread-description"></span></p>
+
+  <div class="wrapper">
+        <h1>Vote Handler</h1>
+        <form id="voteForm">
+            <label for="threadId">Thread ID:</label>
+            <input type="number" id="threadId" name="threadId" required />
+            <button type="submit">Vote</button>
+        </form>
+        <div id="result"></div>
   
   <div id="thread-container">Chargement des threads...</div>
 

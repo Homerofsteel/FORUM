@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../css/home.css">
 </head>
 <body>
+
     <header class="header">
         <a href="#" class="logo">Lucas</a>
     </header>
@@ -20,6 +21,19 @@
         </ul>
     </nav>
 
+    <label for="Category">Category</label><br>
+  <select name="category" id="Category" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+     <option value="">Select a category</option>
+    <option value="sports">Sports</option>
+    <option value="social">Social</option>
+    <option value="politique">Politic</option>
+    <option value="gaming">Gaming</option>
+    <option value="technology">Technology</option>
+    <option value="entertainment">Entertainment</option>
+    <option value="health">Health</option>
+    <option value="education">Education</option>
+  </select><br>
+
     <a href="../html/create_thread.html">create thread</a>
         
     <div class="container">
@@ -32,17 +46,30 @@
     </div>
 
     <script type="module">
-        import { getAllThreads } from '../js/threadController.js';
+        import { getAllThreads, getAllThreadsbyCategory } from '../js/threadController.js';
 
         document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await getAllThreads();
+    } catch (err) {
+        console.error("Erreur lors du chargement des threads:", err);
+        const postsContainer = document.querySelector('.posts');
+        postsContainer.innerHTML = '<p>Erreur lors du chargement des threads.</p>';
+    }
+
+    const categorySelect = document.getElementById("Category");
+    categorySelect.addEventListener("change", handleCategoryChange);
+});
+        async function handleCategoryChange() {
+            const selectedCategory = this.value;
             try {
-                await getAllThreads();
+                await getAllThreadsbyCategory(selectedCategory);
             } catch (err) {
-                console.error("Erreur lors du chargement des threads:", err);
+                console.error("Erreur lors du chargement des threads par catégorie:", err);
                 const postsContainer = document.querySelector('.posts');
                 postsContainer.innerHTML = '<p>Erreur lors du chargement des threads.</p>';
             }
-        });
+        }
     </script>
     
 
