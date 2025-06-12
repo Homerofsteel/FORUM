@@ -9,9 +9,9 @@ const db = new sqlite3.Database('./forum.db', sqlite3.OPEN_READWRITE, (err) => {
 const Auth = {
     async findUserInDatabase(username, password) {
         return new Promise((resolve, reject) => {
-            const query = `SELECT id, username, password FROM users WHERE username = ?`;
+            const query = `SELECT id, username, email, password FROM users WHERE username = ? OR email = ?`;
             
-            db.get(query, [username], async (err, row) => {
+            db.get(query, [username, username], async (err, row) => {
                 if (err) {
                     reject(err);
                     return;
@@ -27,12 +27,13 @@ const Auth = {
                     if (passwordMatch) {
                         resolve({
                             id: row.id,
-                            username: row.username
+                            username: row.username,
+                            email: row.email
                         });
                     } else {
                         resolve(null);
                     }
-                } catch (error) {
+                } catch (error) {s
                     reject(error);
                 }
             });
