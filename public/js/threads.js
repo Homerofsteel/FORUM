@@ -20,7 +20,10 @@ function getThreadById(id, cb) {
       id: row.id,
       Title: row.Title,
       Category: row.Category,
-      Description: row.Description
+      Description: row.Description,
+      Date: row.Date,
+      Likes: row.Likes,
+      Dislikes: row.Dislikes
     });
   });
 }
@@ -38,7 +41,7 @@ function getThreadsbyCategory(category, callback) {
 
 function createThread(title, category, description, cb) {
   const q = 'INSERT INTO Threads (Title, Category, Description, [Upvotes-Number], Date) VALUES (?, ?, ?, ?, ?)';
-  db.run(q, [title, category, description, 0, Date.now()], function (err) {
+  db.run(q, [title, category, description, 0, new Date()], function (err) {
     if (err) return cb(err);
     cb(null, { id: this.lastID });
   });
