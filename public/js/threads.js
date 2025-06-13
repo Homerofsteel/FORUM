@@ -40,8 +40,8 @@ function getThreadsbyCategory(category, callback) {
 }
 
 function createThread(title, category, description, cb) {
-  const q = 'INSERT INTO Threads (Title, Category, Description, [Upvotes-Number], Date) VALUES (?, ?, ?, ?, ?)';
-  db.run(q, [title, category, description, 0, new Date()], function (err) {
+  const q = 'INSERT INTO Threads (Title, Category, Description, Date, Likes, Dislikes) VALUES (?, ?, ?, ?, ?, ?)';
+  db.run(q, [title, category, description,  new Date(),0, 0], function (err) {
     if (err) return cb(err);
     cb(null, { id: this.lastID });
   });

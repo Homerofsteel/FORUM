@@ -66,9 +66,11 @@ app.get('/api/threadsbycategory/:category', (req, res) => {
 });
 
 app.post('/api/create-thread', (req, res) => {
+  console.log('Received like request for thread ID:', req.params.id);
   const { title, category, description } = req.body;
   createThread(title, category, description, (err, result) => {
     if (err) return res.status(500).json({ error: 'Erreur création thread' });
+     console.error('Erreur SQL:', err);
     res.json({ success: true, id: result.id });
   });
 });

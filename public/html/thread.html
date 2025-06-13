@@ -26,8 +26,8 @@
   <p><strong>Catégorie:</strong> <span id="thread-category"></span></p>
   <p><strong>Description:</strong> <span id="thread-description"></span></p>
   <p><strong>Date:</strong><span id="thread-date"></span></p>
-  <i style="font-size:24px" class="fa">&#xf087;</i><span id="thread-like"></span>
-  <i style="font-size:24px" class="fa">&#xf165;</i><span id="thread-dislike"></span>
+  <!-- <i style="font-size:24px" class="fa">&#xf087;</i><span id="thread-like"></span>
+  <i style="font-size:24px" class="fa">&#xf165;</i><span id="thread-dislike"></span> -->
 
   
   <div id="thread-container"></div>
@@ -48,8 +48,8 @@ async function loadThread() {
     document.getElementById('thread-title').textContent = thread.Title;
     document.getElementById('thread-category').textContent = thread.Category;
     document.getElementById('thread-description').textContent = thread.Description;
-    document.getElementById('thread-like').textContent = thread.Likes;
-    document.getElementById('thread-dislike').textContent = thread.Dislikes;
+    // document.getElementById('thread-like').textContent = thread.Likes;
+    // document.getElementById('thread-dislike').textContent = thread.Dislikes;
     const timestamp = thread.Date;
 const date = new Date(Number(timestamp));
 document.getElementById('thread-date').textContent = date.toDateString();
