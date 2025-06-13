@@ -20,6 +20,16 @@
             <li><a href="#">Login</a></li>
         </ul>
     </nav>
+<!-- 
+    <div id="report-form" style="display:none;">
+        <h3>Signaler un problème</h3>
+        <form id="reportForm">
+            <input type="hidden" id="userId">
+            <input type="hidden" id="postId">
+            <textarea id="reason" placeholder="Raison du signalement"></textarea>
+            <button type="submit">Envoyer le signalement</button>
+        </form>
+    </div> -->
 
     <label for="Category">Category</label><br>
   <select name="category" id="Category" style="width: 100%; padding: 8px; margin-bottom: 10px;">
@@ -44,6 +54,8 @@
         <div class="posts">
         </div>
     </div>
+
+
 
     <script type="module">
         import { getAllThreads, getAllThreadsbyCategory } from '../js/threadController.js';
@@ -70,6 +82,42 @@
                 postsContainer.innerHTML = '<p>Erreur lors du chargement des threads.</p>';
             }
         }
+
+        //  function showReportForm(userId, postId) {
+        //     document.getElementById('userId').value = userId;
+        //     document.getElementById('postId').value = postId;
+        //     document.getElementById('report-form').style.display = 'block';
+        // }
+
+        // document.getElementById('reportForm').addEventListener('submit', async function(event) {
+        //     event.preventDefault();
+        //     const userId = document.getElementById('userId').value;
+        //     const postId = document.getElementById('postId').value;
+        //     const reason = document.getElementById('reason').value;
+
+        //     if (!reason) {
+        //         alert('Veuillez entrer une raison pour le signalement.');
+        //         return;
+        //     }
+
+        //     const response = await fetch('/api/report', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({ userId, postId, reason })
+        //     });
+
+        //     const result = await response.json();
+        //     if (response.ok) {
+        //         alert('Signalement envoyé avec succès');
+        //         document.getElementById('report-form').style.display = 'none';
+        //     } else {
+        //         alert('Erreur lors de l\'envoi du signalement: ' + result.error);
+        //     }
+        // });
+
+       
     </script>
     
 </body>

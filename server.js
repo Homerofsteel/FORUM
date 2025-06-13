@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('node:path');
+
+const { setCookie, getCookie, clearCookie, cookieParser }  = require ('./utils/cookieManager.js');
 const {
   getAllThreads,
   getAllThreadIds,
@@ -8,15 +10,37 @@ const {
   createThread
 } = require('./public/js/threads.js');
 
+const fileURLToPath = require('node:url');
+
 const app = express();
 const PORT = 3000;
 
-app.use(express.static('public'));
-app.use(express.json());
 
 app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'))
 );
+
+
+
+app.use(express.static('public'));
+app.use(express.json());
+app.use(cookieParser());
+
+app.get('/set-cookie', (req, res) => {
+  setCookie(res, 'username', 'bob', { maxAge: 900000, httpOnly: true });
+  res.send('Cookie défini');
+});
+
+app.get('/get-cookie', (req, res) => {
+  const username = getCookie(req, 'username');
+  res.send(`Nom d'utilisateur du cookie : ${username}`);
+});
+
+app.get('/clear-cookie', (req, res) => {
+  clearCookie(res, 'username');
+  res.send('Cookie supprimé');
+});
+
 
 app.get('/api/threads', (req, res) => {
   getAllThreads((err, threads) => {
