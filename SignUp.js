@@ -85,7 +85,7 @@ const SignUp = {
 
     validateInput(username, password, email) {
         const errorDiv = document.getElementById('error-message');
-
+        // missing fields 
         if (!username || !password || !email) {
             errorDiv.textContent = 'Un nom d\'utilisateur, un mot de passe et un email sont requis'; 
             errorDiv.style.display = 'block';
@@ -99,13 +99,13 @@ const SignUp = {
             errorDiv.style.display = 'block';
             return false;
         }
-
+        // pass
         if (password.length < 8) {
             errorDiv.textContent = 'Votre mot de passe doit comporter au moins 8 caractères';
             errorDiv.style.display = 'block';
             return false;
         }
-
+        // pass clause
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
         if (!passwordRegex.test(password)) {
             errorDiv.textContent = 'Votre mot de passe doit contenir au moins une lettre et un chiffre';
