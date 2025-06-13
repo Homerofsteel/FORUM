@@ -1,10 +1,11 @@
 {
   "name": "forum",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "A forum application",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -18,7 +19,6 @@
   },
   "homepage": "https://github.com/Homerofsteel/FORUM#readme",
   "dependencies": {
-    "3": "^2.1.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "crypto": "^1.0.1",
