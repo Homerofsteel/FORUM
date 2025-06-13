@@ -1,62 +1,39 @@
-import sqlite3 from "sqlite3";
+import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import db from './database.js';
+import { setCookie, getCookie, clearCookie, cookieParser } from './utils/cookieManager.js';
 
-// Connexion à la base
-const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, (err) => {
-  if (err) {
-    console.error("Erreur lors de la connexion à la base de données:", err.message);
-    return;
-  }
-  console.log("Connexion à la base de données réussie");
+const app = express();
+const PORT = 3000;
 
-  // 1. Créer la table users
-  db.run(`DROP TABLE IF EXISTS users`);
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    email TEXT NOT NULL,
-    password TEXT NOT NULL
-  )`, (err) => {
-    if (err) {
-      console.error("Erreur CREATE:", err.message);
-      return;
-    }
-    console.log("Table users prête.");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-    // Ajoutez cette partie après la création de la table `users`
-    db.run(`CREATE TABLE IF NOT EXISTS reports (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER,
-      post_id INTEGER,
-      reason TEXT,
-      FOREIGN KEY(user_id) REFERENCES users(id),
-      FOREIGN KEY(post_id) REFERENCES posts(id)
-    )`, (err) => {
-      if (err) {
-        console.error("Erreur CREATE reports:", err.message);
-        return;
-      }
-      console.log("Table reports prête.");
-    });
+app.use(express.static('public'));
+app.use(express.json());
+app.use(cookieParser());
 
-    // 2. Insérer un utilisateur
-    db.run(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`,
-      ["bob", "bob@mail.com", "1234"],
-      function (err) {
-        if (err) {
-          console.error("Erreur INSERT:", err.message);
-          return;
-        }
-        console.log(`Utilisateur inséré avec ID ${this.lastID}`);
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'));
+});
 
-        // 3. Lister les utilisateurs après insertion
-        db.all("SELECT username FROM users", [], (err, rows) => {
-          if (err) {
-            console.error("Erreur SELECT:", err.message);
-            return;
-          }
-          console.log("Utilisateurs :");
-          console.log(rows);
-        });
-      });
-  });
+// Routes pour gérer les cookies
+app.get('/set-cookie', (req, res) => {
+  setCookie(res, 'username', 'bob', { maxAge: 900000, httpOnly: true });
+  res.send('Cookie défini');
+});
+
+app.get('/get-cookie', (req, res) => {
+  const username = getCookie(req, 'username');
+  res.send(`Nom d'utilisateur du cookie : ${username}`);
+});
+
+app.get('/clear-cookie', (req, res) => {
+  clearCookie(res, 'username');
+  res.send('Cookie supprimé');
+});
+
+app.listen(PORT, () => {
+  console.log(`Serveur en écoute sur http://localhost:${PORT}`);
 });
