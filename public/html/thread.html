@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title>Forum - Thread</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/home.css">
+</head>
+<body>
+  <header class="header">
+        <a href="#" class="logo">Lucas</a>
+    </header>
+    <div class="stylebar"></div>
+    <nav class="navbar">
+        <ul>
+            <li><a href="../html/home.html">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Login</a></li>
+        </ul>
+    </nav>
+
+  <h1 id="thread-title"></h1>
+  <p><strong>Catégorie:</strong> <span id="thread-category"></span></p>
+  <p><strong>Description:</strong> <span id="thread-description"></span></p>
+  <p><strong>Date:</strong><span id="thread-date"></span></p>
+  <!-- <i style="font-size:24px" class="fa">&#xf087;</i><span id="thread-like"></span>
+  <i style="font-size:24px" class="fa">&#xf165;</i><span id="thread-dislike"></span> -->
+
+  
+  <div id="thread-container"></div>
+
+ <script type="module">
+import { getThreadById } from '../js/threadController.js';
+
+async function loadThread() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const threadId = params.get('id');
+
+    console.log("ID récupéré de l'URL :", threadId);
+    
+    if (!threadId) throw new Error('No thread ID provided');
+
+    const thread = await getThreadById(threadId);
+    document.getElementById('thread-title').textContent = thread.Title;
+    document.getElementById('thread-category').textContent = thread.Category;
+    document.getElementById('thread-description').textContent = thread.Description;
+    // document.getElementById('thread-like').textContent = thread.Likes;
+    // document.getElementById('thread-dislike').textContent = thread.Dislikes;
+    const timestamp = thread.Date;
+const date = new Date(Number(timestamp));
+document.getElementById('thread-date').textContent = date.toDateString();
+
+
+    console.log('Thread loaded:', thread);  
+    document.getElementById('thread-container').textContent = '';
+  } catch (err) {
+    console.error('Error loading thread:', err);
+    document.getElementById('thread-container').textContent = 'Error loading thread';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadThread);
+</script>
+
+</body>
+</html>

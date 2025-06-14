@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./forum.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -6,12 +7,14 @@ const db = new sqlite3.Database('./forum.db', sqlite3.OPEN_READWRITE, (err) => {
     }
 });
 
+const SECRET_KEY = 'your-secret-key'; // même clé secrète utilisée pour signer les tokens JWT
+
 const Auth = {
     async findUserInDatabase(username, password) {
         return new Promise((resolve, reject) => {
-            const query = `SELECT id, username, password FROM users WHERE username = ?`;
+            const query = `SELECT id, username, email, password FROM users WHERE username = ? OR email = ?`;
             
-            db.get(query, [username], async (err, row) => {
+            db.get(query, [username, username], async (err, row) => {
                 if (err) {
                     reject(err);
                     return;
@@ -27,12 +30,13 @@ const Auth = {
                     if (passwordMatch) {
                         resolve({
                             id: row.id,
-                            username: row.username
+                            username: row.username,
+                            email: row.email
                         });
                     } else {
                         resolve(null);
                     }
-                } catch (error) {
+                } catch (error) {s
                     reject(error);
                 }
             });
@@ -59,10 +63,21 @@ const Auth = {
             const user = await this.findUserInDatabase(username, password);
             
             if (user) {
+                // generation de token
+                const token = jwt.sign(
+                    { userId: user.id, username: user.username },
+                    SECRET_KEY,
+                    { expiresIn: '24h' }
+                );
+
+                // Localstorage Token
+                localStorage.setItem('authToken', token);
+
                 return {
                     status: 200,
                     data: { 
                         message: 'Login successful',
+                        token: token,
                         user: {
                             id: user.id,
                             username: user.username
@@ -87,6 +102,24 @@ const Auth = {
             };
         } finally {
             loginButton.disabled = false;
+        }
+    },
+
+    // Mdware
+    verifyToken(req, res, next) {
+        const token = req.headers.authorization?.split(' ')[1] || 
+                     req.cookies.authToken;
+
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        try {
+            const decoded = jwt.verify(token, SECRET_KEY);
+            req.user = decoded;
+            next();
+        } catch (error) {
+            return res.status(401).json({ message: 'Invalid token' });
         }
     }
 };
