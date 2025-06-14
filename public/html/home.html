@@ -1,39 +1,34 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Forum - Home</title>
-    <link rel="stylesheet" href="../css/main.css">
-    <link rel="stylesheet" href="../css/home.css">
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/home.css" />
 </head>
 <body>
 
-    <header class="header">
-        <a href="#" class="logo">Lucas</a>
-    </header>
-    <div class="stylebar"></div>
-    <nav class="navbar">
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact</a></li>
-            <li><a href="#">Login</a></li>
-        </ul>
-    </nav>
-<!-- 
-    <div id="report-form" style="display:none;">
-        <h3>Signaler un problème</h3>
-        <form id="reportForm">
-            <input type="hidden" id="userId">
-            <input type="hidden" id="postId">
-            <textarea id="reason" placeholder="Raison du signalement"></textarea>
-            <button type="submit">Envoyer le signalement</button>
-        </form>
-    </div> -->
+<nav class="navbar">
+    <img src="../images/logo.png" alt="Forum Logo" class="logo-img" />
+  <ul>
+    <li><a href="#">Home</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#">Contact</a></li>
+    <li><a href="#">Login</a></li>
+  </ul>
+</nav>
+<div class="stylebar"></div>
 
-    <label for="Category">Category</label><br>
-  <select name="category" id="Category" style="width: 100%; padding: 8px; margin-bottom: 10px;">
-     <option value="">Select a category</option>
+
+<div class="welcome-box">
+  <h2>Welcome to the Forum!</h2>
+  <p>This is a place to share ideas, ask questions, and connect with others on a variety of topics.</p>
+</div>
+
+
+<select name="category" id="Category" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+    <option value="">Select a category</option>
     <option value="sports">Sports</option>
     <option value="social">Social</option>
     <option value="politique">Politic</option>
@@ -42,83 +37,28 @@
     <option value="entertainment">Entertainment</option>
     <option value="health">Health</option>
     <option value="education">Education</option>
-  </select><br>
+</select><br />
 
-    <a href="../html/create_thread.html">create thread</a>
-        
-    <div class="container">
-        <div class="topcontainer">
-            <h3>About Community</h3>
-            <p>Welcome to our forum! This is a place to discuss anything and everything.</p>
+<select name="sort" id="Sort" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+    <option value="">Sort by:</option>
+    <option value="Date">Date</option>
+    <option value="Likes">Popularity</option>
+</select><br />
+
+<div id="search-bar" style="margin: 20px 0;">
+            <input type="text" id="searchInput" placeholder="Search threads..." onkeyup="rechercher()" />
         </div>
-        <div class="posts">
-        </div>
-    </div>
 
+<button id="create-thread-btn">Create Thread</button>
 
+<div class="container">
 
-    <script type="module">
-        import { getAllThreads, getAllThreadsbyCategory } from '../js/threadController.js';
+    <div class="posts"></div>
+</div>
 
-        document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        await getAllThreads();
-    } catch (err) {
-        console.error("Erreur lors du chargement des threads:", err);
-        const postsContainer = document.querySelector('.posts');
-        postsContainer.innerHTML = '<p>Erreur lors du chargement des threads.</p>';
-    }
+<script type="module" src="../js/homePage.js"></script>
+<script>
+</script>
 
-    const categorySelect = document.getElementById("Category");
-    categorySelect.addEventListener("change", handleCategoryChange);
-});
-        async function handleCategoryChange() {
-            const selectedCategory = this.value;
-            try {
-                await getAllThreadsbyCategory(selectedCategory);
-            } catch (err) {
-                console.error("Erreur lors du chargement des threads par catégorie:", err);
-                const postsContainer = document.querySelector('.posts');
-                postsContainer.innerHTML = '<p>Erreur lors du chargement des threads.</p>';
-            }
-        }
-
-        //  function showReportForm(userId, postId) {
-        //     document.getElementById('userId').value = userId;
-        //     document.getElementById('postId').value = postId;
-        //     document.getElementById('report-form').style.display = 'block';
-        // }
-
-        // document.getElementById('reportForm').addEventListener('submit', async function(event) {
-        //     event.preventDefault();
-        //     const userId = document.getElementById('userId').value;
-        //     const postId = document.getElementById('postId').value;
-        //     const reason = document.getElementById('reason').value;
-
-        //     if (!reason) {
-        //         alert('Veuillez entrer une raison pour le signalement.');
-        //         return;
-        //     }
-
-        //     const response = await fetch('/api/report', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify({ userId, postId, reason })
-        //     });
-
-        //     const result = await response.json();
-        //     if (response.ok) {
-        //         alert('Signalement envoyé avec succès');
-        //         document.getElementById('report-form').style.display = 'none';
-        //     } else {
-        //         alert('Erreur lors de l\'envoi du signalement: ' + result.error);
-        //     }
-        // });
-
-       
-    </script>
-    
 </body>
 </html>

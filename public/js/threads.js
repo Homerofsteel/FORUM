@@ -5,7 +5,7 @@ const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, err => {
 });
 
 function getAllThreads(cb) {
-  db.all('SELECT * FROM threads ORDER BY ID DESC', [], cb);
+  db.all('SELECT * FROM threads ORDER BY Likes DESC', [], cb);
 }
 
 function getAllThreadIds(cb) {
@@ -39,6 +39,16 @@ function getThreadsbyCategory(category, callback) {
     });
 }
 
+function getAllThreadsbySort(sort) {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT * FROM threads ORDER BY ' + (sort === 'Date' ? 'Date DESC' : 'Likes DESC');
+        db.all(query, [], (err, threads) => {
+            if (err) reject(err);
+            else resolve(threads);
+        });
+    });
+}
+
 function createThread(title, category, description, cb) {
   const q = 'INSERT INTO Threads (Title, Category, Description, Date, Likes, Dislikes) VALUES (?, ?, ?, ?, ?, ?)';
   db.run(q, [title, category, description,  new Date(),0, 0], function (err) {
@@ -52,5 +62,6 @@ module.exports = {
   getAllThreadIds,
   getThreadById,
   getThreadsbyCategory,
+  getAllThreadsbySort,
   createThread
 };

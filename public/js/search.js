@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const path = require('node:path');
 
 // Chemin vers la base SQLite
 const dbPath = path.resolve(__dirname, '../db/forum.db');

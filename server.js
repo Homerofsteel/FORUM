@@ -1,12 +1,15 @@
 const express = require('express');
 const path = require('node:path');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./forum.db'); 
 
-const { setCookie, getCookie, clearCookie, cookieParser }  = require ('./utils/cookieManager.js');
+const { setCookie, getCookie, clearCookie, cookieParser }  = require ('./public/js/cookieManager.js');
 const {
   getAllThreads,
   getAllThreadIds,
   getThreadById,
   getThreadsbyCategory,
+  getAllThreadsbySort,
   createThread
 } = require('./public/js/threads.js');
 
@@ -89,8 +92,27 @@ app.get('/api/threadsbycategory/:category', (req, res) => {
     });
 });
 
+app.get('/api/threadsbysort/:sort', (req, res) => {
+    const sort = req.params.sort;
+    console.log('Reçu tri :', sort);
+
+    if (sort !== 'Date' && sort !== 'Likes') {
+        return res.status(400).json({ success: false, error: 'Tri invalide' });
+    }
+
+    getAllThreadsbySort(sort)
+        .then(threads => {
+            res.json(threads);
+        })
+        .catch(err => {
+            console.error('Erreur SQL :', err);
+            res.status(500).json({ success: false, error: 'Erreur récupération threads' });
+        });
+});
+
+
+
 app.post('/api/create-thread', (req, res) => {
-  console.log('Received like request for thread ID:', req.params.id);
   const { title, category, description } = req.body;
   createThread(title, category, description, (err, result) => {
     if (err) return res.status(500).json({ error: 'Erreur création thread' });
@@ -98,6 +120,8 @@ app.post('/api/create-thread', (req, res) => {
     res.json({ success: true, id: result.id });
   });
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`Serveur sur http://localhost:${PORT}`);
