@@ -3,25 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
   <title>Forum - Thread</title>
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="../css/home.css" />
   <link rel="stylesheet" href="../css/thread.css" />
 </head>
 <body>
-  <header class="header">
-    <a href="#" class="logo">Lucas</a>
-  </header>
-  <div class="stylebar"></div>
   <nav class="navbar">
+    <div class="logo-container">
+      <img src="../images/logo.png" alt="Forum Logo" class="logo-img" />
+      <span class="site-title">Bro Company Forum</span>
+    </div>
     <ul>
-      <li><a href="../html/home.html">Home</a></li>
-      <li><a href="#">About</a></li>
-      <li><a href="#">Contact</a></li>
+      <li><a href="#">Home</a></li>
       <li><a href="#">Login</a></li>
     </ul>
   </nav>
+
+  <div class="stylebar"></div>
 
   <div class="thread-info">
   <h1 id="thread-title">Titre</h1>
@@ -37,6 +36,11 @@
 
 
   <div id="thread-container"></div>
+
+  <footer style="position: fixed;">
+    <p>©2025 Bro Company Forum. All rights reserved.</p>
+    <p>Contact: <a href="mailto:support@brocompany.com" style="color: #66ccff;">support@brocompany.com</a></p>
+  </footer>
 
   <script type="module" src="../js/threadPage.js"></script>
 </body>

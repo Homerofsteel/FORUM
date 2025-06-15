@@ -8,8 +8,7 @@ const {
   getAllThreads,
   getAllThreadIds,
   getThreadById,
-  getThreadsbyCategory,
-  getAllThreadsbySort,
+  getFilteredThreads,
   createThread
 } = require('./public/js/threads.js');
 
@@ -70,47 +69,15 @@ app.get('/api/thread/:id', (req, res) => {
   });
 });
 
-app.get('/api/threadsbycategory/:category', (req, res) => {
-    const category = req.params.category;
-    
-    if (!category) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Catégorie requise' 
-        });
-    }
+app.get('/api/threads/filter', (req, res) => {
+  const sort = req.query.sort || 'Date';
+  const category = req.query.category || 'all';
 
-    getThreadsbyCategory(category, (err, threads) => {
-        if (err) {
-            console.error('Error:', err);
-            return res.status(500).json({ 
-                success: false, 
-                error: 'Erreur lors de la récupération des threads' 
-            });
-        }
-        res.json(threads);
-    });
+  getFilteredThreads(category, sort, (err, threads) => {
+    if (err) return res.status(500).json({ error: 'Erreur récupération threads' });
+    res.json(threads);
+  });
 });
-
-app.get('/api/threadsbysort/:sort', (req, res) => {
-    const sort = req.params.sort;
-    console.log('Reçu tri :', sort);
-
-    if (sort !== 'Date' && sort !== 'Likes') {
-        return res.status(400).json({ success: false, error: 'Tri invalide' });
-    }
-
-    getAllThreadsbySort(sort)
-        .then(threads => {
-            res.json(threads);
-        })
-        .catch(err => {
-            console.error('Erreur SQL :', err);
-            res.status(500).json({ success: false, error: 'Erreur récupération threads' });
-        });
-});
-
-
 
 app.post('/api/create-thread', (req, res) => {
   const { title, category, description } = req.body;

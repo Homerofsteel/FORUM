@@ -1,50 +1,54 @@
-import { getAllThreads, getAllThreadsbyCategory, getAllThreadsbySort, renderThreads } from './threadController.js';
-
-window.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('create-thread-btn');
-  const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-
-  if (!isLoggedIn) {
-    btn.style.display = 'none';
-  } else {
-    btn.addEventListener('click', () => {
-      window.location.href = '../html/create_thread.html';
-    });
-  }
-});
+import { getAllThreads, getFilteredThreads, renderThreads, state } from './threadController.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    await getAllThreads();
-  } catch (err) {
-    console.error("Erreur lors du chargement des threads:", err);
-    document.querySelector('.posts').innerHTML = '<p>Erreur lors du chargement des threads.</p>';
-  }
+    const btn = document.getElementById('create-thread-btn');
+    const sortSelect = document.querySelector('#Sort');
+    const categorySelect = document.querySelector('#Category');
 
-  const categorySelect = document.getElementById("Category");
-  categorySelect.addEventListener("change", handleCategoryChange);
+    if (!sortSelect || !categorySelect) {
+        console.error('Sort or category select elements not found');
+        return;
+    }
 
-  const sortSelect = document.getElementById("Sort");
-  sortSelect.addEventListener("change", handleSortChange);
+    if (localStorage.getItem('userLoggedIn') !== 'true') {
+        btn.style.display = 'none';
+    } else {
+        btn.addEventListener('click', () => {
+            location.href = '../html/create_thread.html';
+        });
+    }
+
+    state.currentSort = sortSelect.value || 'Likes';
+    state.currentCategory = categorySelect.value;
+    console.log('Initial state:', state);
+
+    sortSelect.addEventListener('change', handleFilterChange);
+    categorySelect.addEventListener('change', handleFilterChange);
+
+    try {
+        await getAllThreads();
+    } catch (err) {
+        showError('chargement', err);
+    }
 });
 
-async function handleCategoryChange() {
-  const selectedCategory = this.value;
-  try {
-    await getAllThreadsbyCategory(selectedCategory);
-  } catch (err) {
-    console.error("Erreur lors du chargement des threads par catégorie:", err);
-    document.querySelector('.posts').innerHTML = '<p>Erreur lors du chargement des threads.</p>';
-  }
-}
-
-async function handleSortChange(event) {
+async function handleFilterChange() {
     try {
-        const selectedSort = event.target.value;
-        const threads = await getAllThreadsbySort(selectedSort);
+        const newSort = document.querySelector('#Sort').value;
+        const newCategory = document.querySelector('#Category').value;
+
+        if (newSort) state.currentSort = newSort;
+        state.currentCategory = newCategory;
+
+        const threads = await getFilteredThreads();
         renderThreads(threads);
     } catch (err) {
-        console.error("Erreur lors du chargement des threads par catégorie:", err);
-        document.querySelector('.posts').innerHTML = '<p>Erreur lors du chargement des threads.</p>';
+        showError('filtrage/tri', err);
     }
+}
+
+
+function showError(type, err) {
+    console.error(`Erreur lors du ${type} des threads:`, err);
+    document.querySelector('.posts').innerHTML = '<p>Erreur lors du chargement des threads.</p>';
 }

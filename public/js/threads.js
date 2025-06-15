@@ -4,64 +4,51 @@ const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, err => {
   console.log("DB connectée");
 });
 
-function getAllThreads(cb) {
+const getAllThreads = cb => {
   db.all('SELECT * FROM threads ORDER BY Likes DESC', [], cb);
-}
+};
 
-function getAllThreadIds(cb) {
+const getAllThreadIds = cb => {
   db.all('SELECT ID FROM Threads', [], cb);
-}
+};
 
-function getThreadById(id, cb) {
+const getThreadById = (id, cb) => {
   db.get('SELECT * FROM threads WHERE Id = ?', [id], (err, row) => {
     if (err) return cb(err);
-    if (!row) return cb(null, null);
-    cb(null, {
-      id: row.id,
-      Title: row.Title,
-      Category: row.Category,
-      Description: row.Description,
-      Date: row.Date,
-      Likes: row.Likes,
-      Dislikes: row.Dislikes
-    });
+    cb(null, row || null);
   });
-}
+};
 
-function getThreadsbyCategory(category, callback) {
-    const query = 'SELECT * FROM threads WHERE Category = ? ORDER BY Id DESC';
-    db.all(query, [category], (err, threads) => {
-        if (err) {
-            console.error('Database error:', err);
-            return callback(err);
-        }
-        callback(null, threads);
-    });
-}
 
-function getAllThreadsbySort(sort) {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT * FROM threads ORDER BY ' + (sort === 'Date' ? 'Date DESC' : 'Likes DESC');
-        db.all(query, [], (err, threads) => {
-            if (err) reject(err);
-            else resolve(threads);
-        });
-    });
-}
+const getFilteredThreads = (category, sort, cb) => {
+  const order = sort === 'Date' ? 'Date DESC' : 'Likes DESC';
+  let query = 'SELECT * FROM threads';
+  const params = [];
 
-function createThread(title, category, description, cb) {
-  const q = 'INSERT INTO Threads (Title, Category, Description, Date, Likes, Dislikes) VALUES (?, ?, ?, ?, ?, ?)';
-  db.run(q, [title, category, description,  new Date(),0, 0], function (err) {
+  if (category && category !== 'all') {
+    query += ' WHERE category = ?';
+    params.push(category);
+  }
+
+  query += ` ORDER BY ${order}`;
+
+  db.all(query, params, cb);
+};
+
+const createThread = (title, category, description, cb) => {
+  const query = `INSERT INTO Threads (Title, Category, Description, Date, Likes, Dislikes)
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+  const now = new Date();
+  db.run(query, [title, category, description, now, 0, 0], function (err) {
     if (err) return cb(err);
     cb(null, { id: this.lastID });
   });
-}
+};
 
 module.exports = {
   getAllThreads,
   getAllThreadIds,
   getThreadById,
-  getThreadsbyCategory,
-  getAllThreadsbySort,
+  getFilteredThreads,
   createThread
 };
