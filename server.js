@@ -1,7 +1,9 @@
+// server.js
 const express = require('express');
 const path = require('node:path');
+const cookieParser = require('cookie-parser'); // nécessaire ici
 
-const { setCookie, getCookie, clearCookie, cookieParser }  = require ('./utils/cookieManager.js');
+const { setCookie, getCookie, clearCookie } = require('./utils/cookieManager.js');
 const {
   getAllThreads,
   getAllThreadIds,
@@ -10,38 +12,40 @@ const {
   createThread
 } = require('./public/js/threads.js');
 
-const fileURLToPath = require('node:url');
+// 👇👇👇 Ajout commentaires (attention require pas import ici)
+const commentRoutes = require('./routes/comment.js');
 
 const app = express();
 const PORT = 3000;
 
-
-app.get('/', (req, res) =>
-  res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'))
-);
-
-
-
+// Middlewares
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
 
+// 👇 Activation des routes commentaires
+app.use(commentRoutes);
+
+// Routes de base
+app.get('/', (req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'))
+);
+
+// Cookies
 app.get('/set-cookie', (req, res) => {
   setCookie(res, 'username', 'bob', { maxAge: 900000, httpOnly: true });
   res.send('Cookie défini');
 });
-
 app.get('/get-cookie', (req, res) => {
   const username = getCookie(req, 'username');
   res.send(`Nom d'utilisateur du cookie : ${username}`);
 });
-
 app.get('/clear-cookie', (req, res) => {
   clearCookie(res, 'username');
   res.send('Cookie supprimé');
 });
 
-
+// Threads
 app.get('/api/threads', (req, res) => {
   getAllThreads((err, threads) => {
     if (err) return res.status(500).json({ success: false, error: 'Erreur récupération threads' });
@@ -68,33 +72,34 @@ app.get('/api/thread/:id', (req, res) => {
 });
 
 app.get('/api/threadsbycategory/:category', (req, res) => {
-    const category = req.params.category;
-    
-    if (!category) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Catégorie requise' 
-        });
-    }
+  const category = req.params.category;
 
-    getThreadsbyCategory(category, (err, threads) => {
-        if (err) {
-            console.error('Error:', err);
-            return res.status(500).json({ 
-                success: false, 
-                error: 'Erreur lors de la récupération des threads' 
-            });
-        }
-        res.json(threads);
+  if (!category) {
+    return res.status(400).json({
+      success: false,
+      error: 'Catégorie requise'
     });
+  }
+
+  getThreadsbyCategory(category, (err, threads) => {
+    if (err) {
+      console.error('Error:', err);
+      return res.status(500).json({
+        success: false,
+        error: 'Erreur lors de la récupération des threads'
+      });
+    }
+    res.json(threads);
+  });
 });
 
 app.post('/api/create-thread', (req, res) => {
-  console.log('Received like request for thread ID:', req.params.id);
   const { title, category, description } = req.body;
   createThread(title, category, description, (err, result) => {
-    if (err) return res.status(500).json({ error: 'Erreur création thread' });
-     console.error('Erreur SQL:', err);
+    if (err) {
+      console.error('Erreur SQL:', err);
+      return res.status(500).json({ error: 'Erreur création thread' });
+    }
     res.json({ success: true, id: result.id });
   });
 });
