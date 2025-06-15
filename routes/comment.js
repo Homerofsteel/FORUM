@@ -3,7 +3,6 @@ const db = require('../database.js');
 
 const router = express.Router();
 
-// POST : ajout commentaire ou réponse
 router.post('/api/comments', (req, res) => {
   const { thread_id, user_id, content, parent_id } = req.body;
 
@@ -26,7 +25,6 @@ router.post('/api/comments', (req, res) => {
   });
 });
 
-// GET : tous les commentaires pour un thread
 router.get('/api/comments/:thread_id', (req, res) => {
   const threadId = req.params.thread_id;
 

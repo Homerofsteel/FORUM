@@ -12,7 +12,6 @@ const {
   createThread
 } = require('./public/js/threads.js');
 
-// 👇👇👇 Ajout commentaires (attention require pas import ici)
 const commentRoutes = require('./routes/comment.js');
 
 const app = express();
@@ -23,15 +22,12 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
 
-// 👇 Activation des routes commentaires
 app.use(commentRoutes);
 
-// Routes de base
 app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'))
 );
 
-// Cookies
 app.get('/set-cookie', (req, res) => {
   setCookie(res, 'username', 'bob', { maxAge: 900000, httpOnly: true });
   res.send('Cookie défini');
@@ -45,7 +41,6 @@ app.get('/clear-cookie', (req, res) => {
   res.send('Cookie supprimé');
 });
 
-// Threads
 app.get('/api/threads', (req, res) => {
   getAllThreads((err, threads) => {
     if (err) return res.status(500).json({ success: false, error: 'Erreur récupération threads' });
