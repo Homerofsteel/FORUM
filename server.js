@@ -1,8 +1,7 @@
 // server.js
 const express = require('express');
 const path = require('node:path');
-const cookieParser = require('cookie-parser'); // nécessaire ici
-
+const cookieParser = require('cookie-parser');
 const { setCookie, getCookie, clearCookie } = require('./utils/cookieManager.js');
 const {
   getAllThreads,
@@ -13,16 +12,17 @@ const {
 } = require('./public/js/threads.js');
 
 const commentRoutes = require('./routes/comment.js');
+const reportRoutes = require('./routes/report.js');
 
 const app = express();
 const PORT = 3000;
 
-// Middlewares
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
 
 app.use(commentRoutes);
+app.use(reportRoutes);
 
 app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'))
@@ -68,21 +68,14 @@ app.get('/api/thread/:id', (req, res) => {
 
 app.get('/api/threadsbycategory/:category', (req, res) => {
   const category = req.params.category;
-
   if (!category) {
-    return res.status(400).json({
-      success: false,
-      error: 'Catégorie requise'
-    });
+    return res.status(400).json({ success: false, error: 'Catégorie requise' });
   }
 
   getThreadsbyCategory(category, (err, threads) => {
     if (err) {
       console.error('Error:', err);
-      return res.status(500).json({
-        success: false,
-        error: 'Erreur lors de la récupération des threads'
-      });
+      return res.status(500).json({ success: false, error: 'Erreur lors de la récupération des threads' });
     }
     res.json(threads);
   });

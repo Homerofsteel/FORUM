@@ -1,2 +1,10 @@
-INSERT INTO users (Username, email, Password)
-VALUES ('lucas', 'lucas@example.com', '123456');
+DROP TABLE IF EXISTS reports;
+
+CREATE TABLE IF NOT EXISTS reports (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT NOT NULL,
+  reported_id INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  user_id INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
