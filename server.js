@@ -9,7 +9,8 @@ const {
   getAllThreadIds,
   getThreadById,
   getFilteredThreads,
-  createThread
+  createThread,
+  updateVote
 } = require('./public/js/threads.js');
 
 const fileURLToPath = require('node:url');
@@ -88,7 +89,18 @@ app.post('/api/create-thread', (req, res) => {
   });
 });
 
+app.post('/api/thread/:id/vote', (req, res) => {
+  const threadId = req.params.id;
+  const { action } = req.body;
 
+  updateVote(threadId, action, (err, updated) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, error: 'Erreur serveur' });
+    }
+    res.json({ success: true, likes: updated.Likes, dislikes: updated.Dislikes });
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Serveur sur http://localhost:${PORT}`);

@@ -1,54 +1,91 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, err => {
-  if (err) return console.error("Erreur connexion DB:", err.message);
-  console.log("DB connectée");
+
+const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, (err) => {
+  if (err) {
+    console.error("Erreur lors de la connexion à la base de données :", err.message);
+  } else {
+    console.log("Connexion réussie à la base de données.");
+  }
 });
 
-const getAllThreads = cb => {
-  db.all('SELECT * FROM threads ORDER BY Likes DESC', [], cb);
-};
+function getAllThreads(callback) {
+  db.all("SELECT * FROM threads ORDER BY Likes DESC", [], callback);
+}
 
-const getAllThreadIds = cb => {
-  db.all('SELECT ID FROM Threads', [], cb);
-};
+function getAllThreadIds(callback) {
+  db.all("SELECT ID FROM threads", [], callback);
+}
 
-const getThreadById = (id, cb) => {
-  db.get('SELECT * FROM threads WHERE Id = ?', [id], (err, row) => {
-    if (err) return cb(err);
-    cb(null, row || null);
+function getThreadById(id, callback) {
+  db.get("SELECT * FROM threads WHERE ID = ?", [id], (err, row) => {
+    if (err) return callback(err);
+    callback(null, row || null); 
   });
-};
+}
 
-
-const getFilteredThreads = (category, sort, cb) => {
-  const order = sort === 'Date' ? 'Date DESC' : 'Likes DESC';
-  let query = 'SELECT * FROM threads';
+function getFilteredThreads(category, sort, callback) {
+  const tri = sort === "Date" ? "Date DESC" : "Likes DESC";
+  let query = "SELECT * FROM threads";
   const params = [];
 
-  if (category && category !== 'all') {
-    query += ' WHERE category = ?';
+  if (category && category !== "all") {
+    query += " WHERE Category = ?";
     params.push(category);
   }
 
-  query += ` ORDER BY ${order}`;
+  query += ` ORDER BY ${tri}`;
+  db.all(query, params, callback);
+}
 
-  db.all(query, params, cb);
-};
-
-const createThread = (title, category, description, cb) => {
-  const query = `INSERT INTO Threads (Title, Category, Description, Date, Likes, Dislikes)
-                 VALUES (?, ?, ?, ?, ?, ?)`;
+function createThread(title, category, description, callback) {
   const now = new Date();
+  const query = `
+    INSERT INTO threads (Title, Category, Description, Date, Likes, Dislikes)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
   db.run(query, [title, category, description, now, 0, 0], function (err) {
-    if (err) return cb(err);
-    cb(null, { id: this.lastID });
+    if (err) return callback(err);
+    callback(null, { id: this.lastID }); 
   });
-};
+}
+
+function updateVote(threadId, action, callback) {
+  let query;
+
+  switch (action) {
+    case "like":
+      query = "UPDATE threads SET Likes = Likes + 1 WHERE ID = ?";
+      break;
+    case "dislike":
+      query = "UPDATE threads SET Dislikes = Dislikes + 1 WHERE ID = ?";
+      break;
+    case "remove-like":
+      query = "UPDATE threads SET Likes = MAX(Likes - 1, 0) WHERE ID = ?";
+      break;
+    case "remove-dislike":
+      query = "UPDATE threads SET Dislikes = MAX(Dislikes - 1, 0) WHERE ID = ?";
+      break;
+    case "switch-to-like":
+      query = "UPDATE threads SET Likes = Likes + 1, Dislikes = MAX(Dislikes - 1, 0) WHERE ID = ?";
+      break;
+    case "switch-to-dislike":
+      query = "UPDATE threads SET Dislikes = Dislikes + 1, Likes = MAX(Likes - 1, 0) WHERE ID = ?";
+      break;
+    default:
+      return callback(new Error("Action non reconnue"));
+  }
+
+  db.run(query, [threadId], function (err) {
+    if (err) return callback(err);
+    db.get("SELECT Likes, Dislikes FROM threads WHERE ID = ?", [threadId], callback);
+  });
+}
 
 module.exports = {
   getAllThreads,
   getAllThreadIds,
   getThreadById,
   getFilteredThreads,
-  createThread
+  createThread,
+  updateVote
 };
