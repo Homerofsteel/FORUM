@@ -16,7 +16,7 @@ const {
 const fileURLToPath = require('node:url');
 
 const app = express();
-const cookieParser = require('cookie-parser');
+const PORT = 3000;
 const session = require('express-session');
 const Auth = require('./Auth.js');
 
@@ -36,7 +36,6 @@ app.use(session({
     }
 }));
 
-// temp route
 app.get('/login', (req, res) => {
     res.sendFile(__dirname + '/public/html/login.html');
 });
@@ -45,13 +44,8 @@ app.get('/signup', (req, res) => {
     res.sendFile(__dirname + '/public/html/signup.html');
 });
 
-// temp deep routes
-app.get('/home', Auth.verifyToken, (req, res) => {
-    res.sendFile(__dirname + '/public/html/home.html');
-});
-
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/html/index.html');
+app.get('/', Auth.verifyToken, (req, res) => {
+    res.sendFile(__dirname + '/public/html/login.html');
 });
 
 app.get('/api/threads/filter', (req, res) => {
