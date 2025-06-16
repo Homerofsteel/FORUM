@@ -47,8 +47,3 @@ async function handleFilterChange() {
     }
 }
 
-
-function showError(type, err) {
-    console.error(`Erreur lors du ${type} des threads:`, err);
-    document.querySelector('.posts').innerHTML = '<p>Erreur lors du chargement des threads.</p>';
-}
