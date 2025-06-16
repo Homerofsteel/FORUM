@@ -125,8 +125,8 @@ const SignUp = {
                     return;
                 }
                 if (row) {
+                    resolve({ exists: true, message: 'Username already exists' });
                     if (row.username === username) {
-                        resolve({ exists: true, message: 'Username already exists' });
                     } else {
                         resolve({ exists: true, message: 'Email already exists' });
                     }

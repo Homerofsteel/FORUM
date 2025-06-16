@@ -1,21 +1,30 @@
-// server.js
 const express = require('express');
 const path = require('node:path');
-const cookieParser = require('cookie-parser');
-const { setCookie, getCookie, clearCookie } = require('./utils/cookieManager.js');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./forum.db'); 
+
+const { setCookie, getCookie, clearCookie, cookieParser }  = require ('./public/js/cookieManager.js');
 const {
   getAllThreads,
   getAllThreadIds,
   getThreadById,
-  getThreadsbyCategory,
-  createThread
+
+  getFilteredThreads,
+  createThread,
+  updateVote
 } = require('./public/js/threads.js');
+
+const fileURLToPath = require('node:url');
 
 const commentRoutes = require('./routes/comment.js');
 const reportRoutes = require('./routes/report.js');
 
 const app = express();
 const PORT = 3000;
+const session = require('express-session');
+const Auth = require('./Auth.js');
+
+const SECRET_KEY = 'your-secret-key';
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -39,6 +48,28 @@ app.get('/get-cookie', (req, res) => {
 app.get('/clear-cookie', (req, res) => {
   clearCookie(res, 'username');
   res.send('Cookie supprimé');
+});
+app.use(session({
+    secret: SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24
+    }
+}));
+
+app.get('/login', (req, res) => {
+    res.sendFile(__dirname + '/public/html/login.html');
+});
+
+app.get('/signup', (req, res) => {
+    res.sendFile(__dirname + '/public/html/signup.html');
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'));
 });
 
 app.get('/api/threads', (req, res) => {
@@ -66,17 +97,12 @@ app.get('/api/thread/:id', (req, res) => {
   });
 });
 
-app.get('/api/threadsbycategory/:category', (req, res) => {
-  const category = req.params.category;
-  if (!category) {
-    return res.status(400).json({ success: false, error: 'Catégorie requise' });
-  }
+app.get('/api/threads/filter', (req, res) => {
+  const sort = req.query.sort || 'Date';
+  const category = req.query.category || 'all';
 
-  getThreadsbyCategory(category, (err, threads) => {
-    if (err) {
-      console.error('Error:', err);
-      return res.status(500).json({ success: false, error: 'Erreur lors de la récupération des threads' });
-    }
+  getFilteredThreads(category, sort, (err, threads) => {
+    if (err) return res.status(500).json({ error: 'Erreur récupération threads' });
     res.json(threads);
   });
 });
@@ -84,14 +110,25 @@ app.get('/api/threadsbycategory/:category', (req, res) => {
 app.post('/api/create-thread', (req, res) => {
   const { title, category, description } = req.body;
   createThread(title, category, description, (err, result) => {
-    if (err) {
-      console.error('Erreur SQL:', err);
-      return res.status(500).json({ error: 'Erreur création thread' });
-    }
+    if (err) return res.status(500).json({ error: 'Erreur création thread' });
+     console.error('Erreur SQL:', err);
     res.json({ success: true, id: result.id });
+  });
+});
+
+app.post('/api/thread/:id/vote', (req, res) => {
+  const threadId = req.params.id;
+  const { action } = req.body;
+
+  updateVote(threadId, action, (err, updated) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, error: 'Erreur serveur' });
+    }
+    res.json({ success: true, likes: updated.Likes, dislikes: updated.Dislikes });
   });
 });
 
 app.listen(PORT, () => {
   console.log(`Serveur sur http://localhost:${PORT}`);
-});
+}); 

@@ -1,159 +1,125 @@
-export async function getAllThreads() {
-  try {
-    const response = await fetch('/api/threads');
-    if (!response.ok) throw new Error('Erreur réseau');
-    const threads = await response.json();
+export const state = {
+  currentSort: 'Likes',
+  currentCategory: 'all'
+};
 
-    const postsContainer = document.querySelector('.posts');
-    postsContainer.innerHTML = "";
+async function api(url, options = {}) {
+  const response = await fetch(url, options);
+  const result = await response.json();
 
-    threads.forEach(thread => {
-      const postElement = document.createElement('div');
-      postElement.className = 'post';
-      postElement.style.cursor = 'pointer';
-      postElement.innerHTML = `
-        <div class="votes">
-          <div>▲</div>
-          <div>0</div>
-          <div>▼</div>
-        </div>
-        <div class="post-content">
-          <h2>${thread.Title || 'No Title'}</h2>
-          <div class="post-meta">| Catégorie: ${thread.Category || 'No Category'}</div>
-          <div class="post-description">${thread.Description || 'No Description'}</div>
-        </div>
-      `;
+  if (!response.ok || result.success === false) {
+    throw new Error(result.error || 'Erreur API');
+  }
 
-      postElement.addEventListener('click', () => {
-  window.location.href = `html/thread.html?id=${thread.ID}`;
-});
+  return result.data || result;
+}
 
-      postsContainer.appendChild(postElement);
+export function renderThreads(threads) {
+  const container = document.querySelector('.posts');
+  if (!container) return;
+
+  if (!threads.length) {
+    container.innerHTML = `<p>Aucun thread trouvé.</p>`;
+    return;
+  }
+
+  container.innerHTML = threads.map(thread => `
+    <div class="post" data-id="${thread.ID || thread.Id}" style="cursor:pointer">
+      <div class="votes">${thread.Likes}</div>
+      <div>
+        <h2>${thread.Title}</h2>
+        <p>Catégorie : ${thread.Category}</p>
+        <p>${thread.Description}</p>
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.post').forEach(post => {
+    post.addEventListener('click', () => {
+      const id = post.dataset.id;
+      if (id) window.location.href = `/html/thread.html?id=${id}`;
     });
-
-
-  } catch (err) {
-    console.error("Erreur fetch threads:", err);
-    throw err;
-  }
+  });
 }
 
-
-  async function getAllThreadsIds() {
-    try {
-      const response = await fetch('/api/threadsids');
-      const threads = await response.json();
-      console.log("Threads récupérés :", threads);
-
-      const postsContainer = document.querySelector('.posts');
-      postsContainer.innerHTML = "";
-
-      threads.forEach(thread => {
-        const postHTML = `
-              <h2>${thread.Id}</h2>`;
-        postsContainer.insertAdjacentHTML('beforeend', postHTML);
-      });
-
-    } catch (err) {
-      console.error("Erreur fetch threads:", err);
-    }
-  }
-
-export async function getAllThreadsbyCategory(category) {
-    try {
-        const response = await fetch(`/api/threadsbycategory/${category}`);
-        if (!response.ok) {
-            throw new Error('Erreur réseau');
-        }
-        
-        const threads = await response.json();
-        console.log("Threads de la catégorie", category, ":", threads);
-
-        const postsContainer = document.querySelector('.posts');
-        postsContainer.innerHTML = "";
-
-        if (threads.length === 0) {
-            postsContainer.innerHTML = `<p>Aucun thread trouvé dans la catégorie ${category}</p>`;
-            return;
-        }
-
-        threads.forEach(thread => {
-            const postElement = document.createElement('div');
-            postElement.className = 'post';
-            postElement.style.cursor = 'pointer';
-            postElement.innerHTML = `
-                <div class="votes">
-                    <div>▲</div>
-                    <div>0</div>
-                    <div>▼</div>
-                </div>
-                <div class="post-content">
-                    <h2>${thread.Title || 'No Title'}</h2>
-                    <div class="post-meta">| Catégorie: ${thread.Category || 'No Category'}</div>
-                    <div class="post-description">${thread.Description || 'No Description'}</div>
-                </div>
-            `;
-
-            postElement.addEventListener('click', () => {
-                window.location.href = `thread.html?id=${thread.Id}`;
-            });
-
-            postsContainer.appendChild(postElement);
-        });
-
-    } catch (err) {
-        console.error("Erreur fetch threads par catégorie:", err);
-        const postsContainer = document.querySelector('.posts');
-        postsContainer.innerHTML = '<p>Erreur lors du chargement des threads.</p>';
-        throw err;
-    }
+export function getAllThreads() {
+  api('/api/threads')
+    .then(renderThreads)
+    .catch(err => console.error('Erreur chargement threads :', err));
 }
 
-export async function getThreadById(id) {
-    try {
-        const response = await fetch(`/api/thread/${id}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        
-        if (!data.success) {
-            throw new Error(data.error || 'Failed to load thread');
-        }
-        
-        return data.data;
-    } catch (err) {
-        console.error("Error fetching thread:", err);
-        throw err;
-    }
+export function getThreadById(id) {
+  return api(`/api/thread/${id}`);
+}
+
+export function getFilteredThreads() {
+  const { currentSort, currentCategory } = state;
+  return api(`/api/threads/filter?sort=${currentSort}&category=${currentCategory}`);
 }
 
 export function CreateThread() {
   const form = document.getElementById('threadform');
   if (!form) return;
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const title = document.getElementById('Title').value.trim();
-    const category = document.getElementById('Category').value;
-    const description = document.getElementById('Description').value.trim();
+    const title = form.Title.value.trim();
+    const category = form.Category.value;
+    const description = form.Description.value.trim();
 
-    fetch('../../api/create-thread', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, category, description })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          window.location.href = `thread.html?id=${data.id}`;
-        } else {
-          alert("Erreur lors de la création du thread.");
-        }
-      })
-      .catch(err => {
-        console.error("Erreur fetch :", err);
+    try {
+      const result = await api('/api/create-thread', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, category, description })
       });
+
+      window.location.href = `thread.html?id=${result.id}`;
+    } catch (err) {
+      console.error('Erreur création thread :', err);
+      alert("Erreur lors de la création du thread.");
+    }
   });
+}
+
+export function vote(threadId, type) {
+  const key = `vote-${threadId}`;
+  const current = localStorage.getItem(key);
+
+  let action;
+  if (current === type) {
+    action = type === 'like' ? 'remove-like' : 'remove-dislike';
+    localStorage.removeItem(key);
+  } else {
+    action = current ? `switch-to-${type}` : type;
+    localStorage.setItem(key, type);
+  }
+
+  fetch(`/api/thread/${threadId}/vote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const like = document.getElementById(`like-count-${threadId}`);
+        const dislike = document.getElementById(`dislike-count-${threadId}`);
+        if (like) like.textContent = data.likes;
+        if (dislike) dislike.textContent = data.dislikes;
+
+        updateVoteButtons(threadId);
+      }
+    })
+    .catch(err => console.error('Erreur lors du vote :', err));
+}
+
+function updateVoteButtons(threadId) {
+  const vote = localStorage.getItem(`vote-${threadId}`);
+  const likeBtn = document.getElementById(`like-button-${threadId}`);
+  const dislikeBtn = document.getElementById(`dislike-button-${threadId}`);
+
+  if (likeBtn) likeBtn.classList.toggle('liked', vote === 'like');
+  if (dislikeBtn) dislikeBtn.classList.toggle('disliked', vote === 'dislike');
 }
