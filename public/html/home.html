@@ -74,7 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('authToken');
     const loginLink = document.querySelector('a[href="/public/html/login.html"]');
     const signupLink = document.querySelector('a[href="/public/html/signup.html"]');
+    const createThreadBtn = document.getElementById('create-thread-btn');
     
+    if (!token) {
+        createThreadBtn.style.display = 'none';
+    }
+
     if (token) {
         loginLink.textContent = 'Logout';
         loginLink.href = '#';

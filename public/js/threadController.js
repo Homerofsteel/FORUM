@@ -58,6 +58,12 @@ export function getFilteredThreads() {
 }
 
 export function CreateThread() {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+      window.location.href = '/public/html/login.html';
+      return;
+  }
+
   const form = document.getElementById('threadform');
   if (!form) return;
 
@@ -84,35 +90,42 @@ export function CreateThread() {
 }
 
 export function vote(threadId, type) {
-  const key = `vote-${threadId}`;
-  const current = localStorage.getItem(key);
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert('Please login to vote on threads');
+        window.location.href = '/public/html/login.html';
+        return;
+    }
 
-  let action;
-  if (current === type) {
-    action = type === 'like' ? 'remove-like' : 'remove-dislike';
-    localStorage.removeItem(key);
-  } else {
-    action = current ? `switch-to-${type}` : type;
-    localStorage.setItem(key, type);
-  }
+    const key = `vote-${threadId}`;
+    const current = localStorage.getItem(key);
 
-  fetch(`/api/thread/${threadId}/vote`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        const like = document.getElementById(`like-count-${threadId}`);
-        const dislike = document.getElementById(`dislike-count-${threadId}`);
-        if (like) like.textContent = data.likes;
-        if (dislike) dislike.textContent = data.dislikes;
+    let action;
+    if (current === type) {
+        action = type === 'like' ? 'remove-like' : 'remove-dislike';
+        localStorage.removeItem(key);
+    } else {
+        action = current ? `switch-to-${type}` : type;
+        localStorage.setItem(key, type);
+    }
 
-        updateVoteButtons(threadId);
-      }
+    fetch(`/api/thread/${threadId}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
     })
-    .catch(err => console.error('Erreur lors du vote :', err));
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const like = document.getElementById(`like-count-${threadId}`);
+                const dislike = document.getElementById(`dislike-count-${threadId}`);
+                if (like) like.textContent = data.likes;
+                if (dislike) dislike.textContent = data.dislikes;
+
+                updateVoteButtons(threadId);
+            }
+        })
+        .catch(err => console.error('Erreur lors du vote :', err));
 }
 
 function updateVoteButtons(threadId) {

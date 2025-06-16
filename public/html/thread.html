@@ -41,6 +41,15 @@
 
 </div>
 
+<div class="comments-section">
+    <h3>Comments</h3>
+    <div id="comments-container"></div>
+    
+    <form id="comment-form" class="comment-form">
+        <textarea id="comment-content" placeholder="Write a comment..." required></textarea>
+        <button type="submit">Commenter</button>
+    </form>
+</div>
 
   <div id="thread-container"></div>
 
@@ -50,5 +59,26 @@
   </footer>
 
   <script type="module" src="../js/threadPage.js"></script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('authToken');
+    const voteButtons = document.querySelectorAll('#like-button, #dislike-button');
+    const commentForm = document.getElementById('comment-form');
+    
+    if (!token) {
+        voteButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('Connectez-vous pour voter');
+                window.location.href = '/public/html/login.html';
+            });
+        });
+        
+        if (commentForm) {
+            commentForm.innerHTML = '<p>Veuillez <a href="/public/html/login.html">vous connecter</a> pour commenter</p>';
+        }
+    }
+});
+</script>
 </body>
 </html>

@@ -35,6 +35,20 @@ const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, (err) => {
     }
     console.log("Table reports prête.");
   });
+
+  db.run(`CREATE TABLE IF NOT EXISTS comments (
+    thread_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    parent_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (thread_id) REFERENCES threads(ID),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (parent_id) REFERENCES comments(rowid)
+  )`, err => {
+    if (err) console.error("Error creating comments table:", err.message);
+    else console.log("Comments table ready");
+  });
 });
 
 export default db;

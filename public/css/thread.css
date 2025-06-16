@@ -71,3 +71,36 @@
   font-size: 0.9rem;
   margin-bottom: 15px;
 }
+
+.comments-section {
+    margin: 30px auto;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.comment {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.comment-meta {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 8px;
+}
+
+.comment-form {
+    margin-top: 20px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}

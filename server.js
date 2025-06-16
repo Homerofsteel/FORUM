@@ -195,12 +195,12 @@ app.post('/api/create-thread', authenticateToken, (req, res) => {
   createThread(title, category, description, (err, result) => {
     if (err) return res.status(500).json({ error: 'Erreur création thread' });
      console.error('Erreur SQL:', err);
-    res.json({ success: true, id: result.id });
+    res.json({ success: true, id: result.Id });
   });
 });
 
 app.post('/api/thread/:id/vote', authenticateToken, (req, res) => {
-  const threadId = req.params.id;
+  const threadId = req.params.Id;
   const { action } = req.body;
 
   updateVote(threadId, action, (err, updated) => {
@@ -224,11 +224,47 @@ app.post('/api/logout', (req, res) => {
 // F5 Tokens
 app.post('/api/refresh-token', authenticateToken, (req, res) => {
     const token = jwt.sign(
-        { userId: req.user.userId, username: req.user.username },
+        { userId: req.users.Id, username: req.users.Username },
         SECRET_KEY,
         { expiresIn: '24h' }
     );
     res.json({ success: true, token });
+});
+
+app.get('/api/thread/:id/comments', async (req, res) => {
+    const threadId = req.params.id;
+    
+    const query = `
+        SELECT c.*, u.Username as username 
+        FROM comments c
+        JOIN users u ON c.user_id = u.id 
+        WHERE c.thread_id = ? 
+        ORDER BY c.created_at DESC
+    `;
+    
+    db.all(query, [threadId], (err, comments) => {
+        if (err) {
+            console.error('Error fetching comments:', err);
+            return res.status(500).json({ success: false, error: 'Error fetching comments' });
+        }
+        res.json({ success: true, comments });
+    });
+});
+
+app.post('/api/thread/:id/comment', authenticateToken, (req, res) => {
+    const { content } = req.body;
+    const threadId = req.params.id;
+    const userId = req.user.userId;
+
+    db.run('INSERT INTO comments (thread_id, user_id, content, created_at) VALUES (?, ?, ?, datetime("now"))', 
+        [threadId, userId, content], 
+        function(err) {
+            if (err) {
+                console.error('Error creating comment:', err);
+                return res.status(500).json({ success: false, error: 'Error creating comment' });
+            }
+            res.json({ success: true, commentId: this.lastID });
+        });
 });
 
 app.listen(PORT, () => {
