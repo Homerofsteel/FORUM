@@ -1,13 +1,16 @@
 const express = require('express');
 const path = require('node:path');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./forum.db'); 
 
-const { setCookie, getCookie, clearCookie, cookieParser }  = require ('./utils/cookieManager.js');
+const { setCookie, getCookie, clearCookie, cookieParser }  = require ('./public/js/cookieManager.js');
 const {
   getAllThreads,
   getAllThreadIds,
   getThreadById,
-  getThreadsbyCategory,
-  createThread
+  getFilteredThreads,
+  createThread,
+  updateVote
 } = require('./public/js/threads.js');
 
 const fileURLToPath = require('node:url');
@@ -67,35 +70,35 @@ app.get('/api/thread/:id', (req, res) => {
   });
 });
 
-app.get('/api/threadsbycategory/:category', (req, res) => {
-    const category = req.params.category;
-    
-    if (!category) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Catégorie requise' 
-        });
-    }
+app.get('/api/threads/filter', (req, res) => {
+  const sort = req.query.sort || 'Date';
+  const category = req.query.category || 'all';
 
-    getThreadsbyCategory(category, (err, threads) => {
-        if (err) {
-            console.error('Error:', err);
-            return res.status(500).json({ 
-                success: false, 
-                error: 'Erreur lors de la récupération des threads' 
-            });
-        }
-        res.json(threads);
-    });
+  getFilteredThreads(category, sort, (err, threads) => {
+    if (err) return res.status(500).json({ error: 'Erreur récupération threads' });
+    res.json(threads);
+  });
 });
 
 app.post('/api/create-thread', (req, res) => {
-  console.log('Received like request for thread ID:', req.params.id);
   const { title, category, description } = req.body;
   createThread(title, category, description, (err, result) => {
     if (err) return res.status(500).json({ error: 'Erreur création thread' });
      console.error('Erreur SQL:', err);
     res.json({ success: true, id: result.id });
+  });
+});
+
+app.post('/api/thread/:id/vote', (req, res) => {
+  const threadId = req.params.id;
+  const { action } = req.body;
+
+  updateVote(threadId, action, (err, updated) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, error: 'Erreur serveur' });
+    }
+    res.json({ success: true, likes: updated.Likes, dislikes: updated.Dislikes });
   });
 });
 

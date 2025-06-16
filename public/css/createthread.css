@@ -1,0 +1,43 @@
+
+
+#threadform {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 700px; 
+    margin: auto;
+    margin-top: 50px;
+}
+
+#description {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-bottom: 10px
+}
+
+#submitbutton {
+    width: 20%;
+    background-color: #4a90e2;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 10px 20px; 
+    color: white; 
+    border: none; 
+    cursor: pointer;
+     display: block;
+    margin: 20px auto 0 auto;
+}
+
+#submitbutton:hover {
+    background-color: #357ab7;
+    transform: scale(1.05);
+}
