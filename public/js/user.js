@@ -8,7 +8,7 @@ const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, (err) => {
   console.log("Connexion à la base de données réussie");
 
 
-    db.run(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`,
+    db.run(`INSERT INTO users (Username, Email, Password) VALUES (?, ?, ?)`,
       ["bob", "bob@mail.com", "1234"],
       function (err) {
         if (err) {
@@ -17,7 +17,7 @@ const db = new sqlite3.Database("forum.db", sqlite3.OPEN_READWRITE, (err) => {
         }
         console.log(`Utilisateur inséré avec ID ${this.lastID}`);
 
-        db.all("SELECT username FROM users", [], (err, rows) => {
+        db.all("SELECT Username FROM users", [], (err, rows) => {
           if (err) {
             console.error("Erreur SELECT:", err.message);
             return;

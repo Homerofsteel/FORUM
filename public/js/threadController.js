@@ -123,3 +123,20 @@ function updateVoteButtons(threadId) {
   if (likeBtn) likeBtn.classList.toggle('liked', vote === 'like');
   if (dislikeBtn) dislikeBtn.classList.toggle('disliked', vote === 'dislike');
 }
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('authToken');
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+    };
+}
+
+async function createThread(data) {
+    const response = await fetch('/api/create-thread', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data)
+    });
+    // ...
+}

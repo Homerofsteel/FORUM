@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Forum</title>
-    <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="/public/css/login.css">
 </head>
 <body>
     <div class="container">
@@ -33,16 +33,68 @@
             </form>
         </div>
     </div>
-    <script type="module">
-        import SignUp from '../../SignUp.js';
-        
-        const form = document.getElementById('signupForm');
-        form.addEventListener('submit', async (event) => {
-            const result = await SignUp.handleSignIn(event);
-            if (result.status === 201) {
-                window.location.href = 'login.html';
-            }
+    <script>
+function validateInput(username, password, email) {
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return 'Please enter a valid email address';
+    }
+
+    // mdp taille
+    if (password.length < 8) {
+        return 'Password must be at least 8 characters long';
+    }
+
+    // mdp complexité
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return 'Password must contain at least one letter and one number';
+    }
+
+    // nom d'utilisateur taille
+    if (!username || username.length < 3) {
+        return 'Username must be at least 3 characters long';
+    }
+
+    return null; // no err
+}
+
+document.getElementById('signupForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('error-message');
+    
+    console.log('Attempting signup:', { username, email }); // Debug log
+    
+    try {
+        const response = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username: username,
+                email: email,
+                password: password 
+            })
         });
-    </script>
+        
+        const data = await response.json();
+        console.log('Signup response:', data); // Debug log
+        
+        if (data.success) {
+            window.location.href = 'login.html';
+        } else {
+            errorDiv.textContent = data.message || 'Signup failed';
+            errorDiv.style.display = 'block';
+        }
+    } catch (err) {
+        console.error('Signup error:', err);
+        errorDiv.textContent = 'An error occurred during signup';
+        errorDiv.style.display = 'block';
+    }
+});
+</script>
 </body>
 </html>

@@ -1,37 +1,34 @@
-    import bcrypt from 'bcrypt';
-import sqlite3 from 'sqlite3';
-
-const db = new sqlite3.Database('./forum.db', sqlite3.OPEN_READWRITE, (err) => {
-    if (err) {
-        console.error('Error connecting to database:', err);
-    }
-});
+const bcrypt = require('bcrypt');
+const sqlite3 = require('sqlite3');
 
 const SignUp = {
     async createUser(username, password, email) {
+        const db = new sqlite3.Database('./forum.db');
         try {
-            const existingUser = await this.checkUserExists(username, email);
+            console.log('Creating user:', { username, email }); // Debug log
+
+            const existingUser = await this.checkUserExists(db, username, email);
             if (existingUser.exists) {
-                return {
-                    status: 409,
-                    data: { message: existingUser.message }
-                };
+                throw new Error(existingUser.message);
             }
 
-            const hashedPassword = bcrypt.hashSync(password, 10);
-            const query = `INSERT INTO users (username, password, email) VALUES (?, ?, ?)`;
+            const hashedPassword = await bcrypt.hash(password, 10);
+            console.log('Password hashed successfully'); // Debug log
 
             return new Promise((resolve, reject) => {
+                const query = 'INSERT INTO users (Username, Password, Email) VALUES (?, ?, ?)';
                 db.run(query, [username, hashedPassword, email], function(err) {
                     if (err) {
+                        console.error('Database error:', err); // Debug log
                         reject(err);
                         return;
                     }
+                    console.log('User created with ID:', this.lastID); // Debug log
                     resolve(this.lastID);
                 });
             });
-        } catch (err) {
-            throw err;
+        } finally {
+            db.close();
         }
     },
 
@@ -116,25 +113,26 @@ const SignUp = {
         return true;
     },
 
-    async checkUserExists(username, email) {
+    async checkUserExists(db, username, email) {
         return new Promise((resolve, reject) => {
-            const query = `SELECT username, email FROM users WHERE username = ? OR email = ?`;
+            const query = `SELECT Username, Email FROM users WHERE Username = ? OR Email = ?`;
             db.get(query, [username, email], (err, row) => {
                 if (err) {
                     reject(err);
                     return;
                 }
                 if (row) {
-                    resolve({ exists: true, message: 'Username already exists' });
-                    if (row.username === username) {
+                    if (row.Username === username) {
+                        resolve({ exists: true, message: 'Utilisateur existes déja' });
                     } else {
-                        resolve({ exists: true, message: 'Email already exists' });
+                        resolve({ exists: true, message: 'Email existes déja' });
                     }
+                } else {
+                    resolve({ exists: false, message: '' });
                 }
-                resolve({ exists: false, message: '' });
             });
         });
     }
 };
 
-export default SignUp;
+module.exports = SignUp;

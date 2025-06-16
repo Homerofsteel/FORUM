@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Forum</title>
-    <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="/public/css/login.css">
 </head>
 <body>
     <div class="container">
@@ -29,16 +29,39 @@
             </form>
         </div>
     </div>
-    <script type="module">
-        import Auth from '../../Auth.js';
-        
-        const form = document.getElementById('loginForm');
-        form.addEventListener('submit', async (event) => {
-            const result = await Auth.handleLogin(event);
-            if (result.status === 200) {
-                window.location.href = 'home.html';
-            }
+    <script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('error-message');
+    
+    console.log('Attempting login with username:', username);
+    
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
         });
-    </script>
+
+        const data = await response.json();
+        console.log('Server response:', data);
+
+        if (data.success) {
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('userLoggedIn', 'true');
+            window.location.href = '/public/html/home.html';
+        } else {
+            errorDiv.textContent = data.message || 'Invalid username or password';
+            errorDiv.style.display = 'block';
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        errorDiv.textContent = 'An error occurred during login';
+        errorDiv.style.display = 'block';
+    }
+});
+</script>
 </body>
 </html>

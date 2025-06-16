@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Forum - Home</title>
-  <link rel="stylesheet" href="../css/main.css" />
-  <link rel="stylesheet" href="../css/home.css" />
+  <link rel="stylesheet" href="/public/css/main.css" />
+  <link rel="stylesheet" href="/public/css/home.css" />
   <style>
     
   </style>
@@ -17,8 +17,9 @@
       <span class="site-title">Bro Company Forum</span>
     </div>
     <ul>
-      <li><a href="#">Home(r of steel)</a></li>
-      <li><a href="#">Login</a></li>
+        <li><a href="/public/html/home.html">Home(r of steel)</a></li>
+        <li><a href="/public/html/login.html">Login</a></li>
+        <li><a href="/public/html/signup.html">Signup</a></li>
     </ul>
   </nav>
 
@@ -67,5 +68,30 @@
   </footer>
 
   <script type="module" src="../js/homePage.js"></script>
+  <script>
+// Clause de detection pour authetification sur chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('authToken');
+    const loginLink = document.querySelector('a[href="/public/html/login.html"]');
+    const signupLink = document.querySelector('a[href="/public/html/signup.html"]');
+    
+    if (token) {
+        loginLink.textContent = 'Logout';
+        loginLink.href = '#';
+        loginLink.addEventListener('click', logout);
+        signupLink.style.display = 'none';
+    }
+});
+
+async function logout() {
+    try {
+        await fetch('/api/logout', { method: 'POST' });
+        localStorage.removeItem('authToken');
+        window.location.href = '/public/html/login.html';
+    } catch (err) {
+        console.error('Logout error:', err);
+    }
+}
+</script>
 </body>
 </html>

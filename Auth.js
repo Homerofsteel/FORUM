@@ -1,46 +1,58 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./forum.db', sqlite3.OPEN_READWRITE, (err) => {
-    if (err) {
-        console.error('Error connecting to database:', err);
-    }
-});
+function getConnection() {
+    return new sqlite3.Database('./forum.db', (err) => {
+        if (err) console.error('Database connection error:', err);
+    });
+}
 
 const SECRET_KEY = 'your-secret-key'; // même clé secrète utilisée pour signer les tokens JWT
 
 const Auth = {
     async findUserInDatabase(username, password) {
-        return new Promise((resolve, reject) => {
-            const query = `SELECT id, username, email, password FROM users WHERE username = ? OR email = ?`;
-            
-            db.get(query, [username, username], async (err, row) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
+        const db = getConnection();
+        try {
+            return new Promise((resolve, reject) => {
+                const query = `SELECT * FROM users WHERE Username = ? OR Email = ?`;
                 
-                if (!row) {
-                    resolve(null);
-                    return;
-                }
-
-                try {
-                    const passwordMatch = await bcrypt.compare(password, row.password);
-                    if (passwordMatch) {
-                        resolve({
-                            id: row.id,
-                            username: row.username,
-                            email: row.email
-                        });
-                    } else {
-                        resolve(null);
+                db.get(query, [username, username], async (err, row) => {
+                    if (err) {
+                        console.error('Database error:', err);
+                        reject(err);
+                        return;
                     }
-                } catch (error) {s
-                    reject(error);
-                }
+                    
+                    if (!row) {
+                        resolve(null);
+                        return;
+                    }
+
+                    try {
+                        if (!password || !row.Password) {
+                            resolve(null);
+                            return;
+                        }
+
+                        const match = await bcrypt.compare(password, row.Password);
+                        if (match) {
+                            resolve({
+                                id: row.Id,
+                                username: row.Username,
+                                email: row.Email
+                            });
+                        } else {
+                            resolve(null);
+                        }
+                    } catch (error) {
+                        console.error('Password comparison error:', error);
+                        reject(error);
+                    }
+                });
             });
-        });
+        } finally {
+            db.close();
+        }
     },
 
     async handleLogin(event) {
@@ -65,7 +77,7 @@ const Auth = {
             if (user) {
                 // generation de token
                 const token = jwt.sign(
-                    { userId: user.id, username: user.username },
+                    { userId: user.Id, username: user.Username },
                     SECRET_KEY,
                     { expiresIn: '24h' }
                 );
@@ -79,8 +91,8 @@ const Auth = {
                         message: 'Login successful',
                         token: token,
                         user: {
-                            id: user.id,
-                            username: user.username
+                            id: user.Id,
+                            username: user.Username
                         }
                     }
                 };
@@ -107,19 +119,30 @@ const Auth = {
 
     // Mdware
     verifyToken(req, res, next) {
-        const token = req.headers.authorization?.split(' ')[1] || 
-                     req.cookies.authToken;
+        const token = req.headers.authorization?.split(' ')[1] || req.cookies.authToken;
 
         if (!token) {
-            return res.status(401).json({ message: 'No token provided' });
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Authentification requise' 
+            });
         }
 
         try {
             const decoded = jwt.verify(token, SECRET_KEY);
+            if (decoded.exp < Date.now() / 1000) {
+                return res.status(401).json({ 
+                    success: false, 
+                    message: 'Token expiré' 
+                });
+            }
             req.user = decoded;
             next();
         } catch (error) {
-            return res.status(401).json({ message: 'Invalid token' });
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Token non valide' 
+            });
         }
     }
 };
