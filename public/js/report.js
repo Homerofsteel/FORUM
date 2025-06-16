@@ -1,7 +1,7 @@
 // routes/report.js
 const express = require('express');
 const router = express.Router();
-const db = require('../database'); // ✅ bon chemin
+const db = require('../../database'); // ✅ bon chemin
 
 // ✅ POST - ajouter un signalement
 router.post('/api/report', (req, res) => {

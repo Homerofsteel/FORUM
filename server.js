@@ -16,8 +16,8 @@ const {
 
 const fileURLToPath = require('node:url');
 
-const commentRoutes = require('./routes/comment.js');
-const reportRoutes = require('./routes/report.js');
+const commentRoutes = require('./public/js/comment.js');
+const reportRoutes = require('./public/js/report.js');
 
 const app = express();
 const PORT = 3000;
