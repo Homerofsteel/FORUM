@@ -25,7 +25,7 @@ export function renderThreads(threads) {
 
   container.innerHTML = threads.map(thread => `
     <div class="post" data-id="${thread.ID || thread.Id}" style="cursor:pointer">
-      <div class="votes">${thread.Likes}</div>
+      <div class="votes"><br>${thread.Likes}</div>
       <div>
         <h2>${thread.Title}</h2>
         <p>Catégorie : ${thread.Category}</p>
