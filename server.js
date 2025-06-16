@@ -16,58 +16,42 @@ const {
 const fileURLToPath = require('node:url');
 
 const app = express();
-const PORT = 3000;
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const Auth = require('./Auth.js');
 
-
-app.get('/', (req, res) =>
-  res.sendFile(path.join(__dirname, 'public', 'html', 'home.html'))
-);
-
-
+const SECRET_KEY = 'your-secret-key';
 
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cookieParser());
+app.use(session({
+    secret: SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24
+    }
+}));
 
-app.get('/set-cookie', (req, res) => {
-  setCookie(res, 'username', 'bob', { maxAge: 900000, httpOnly: true });
-  res.send('Cookie défini');
+// temp route
+app.get('/login', (req, res) => {
+    res.sendFile(__dirname + '/public/html/login.html');
 });
 
-app.get('/get-cookie', (req, res) => {
-  const username = getCookie(req, 'username');
-  res.send(`Nom d'utilisateur du cookie : ${username}`);
+app.get('/signup', (req, res) => {
+    res.sendFile(__dirname + '/public/html/signup.html');
 });
 
-app.get('/clear-cookie', (req, res) => {
-  clearCookie(res, 'username');
-  res.send('Cookie supprimé');
+// temp deep routes
+app.get('/home', Auth.verifyToken, (req, res) => {
+    res.sendFile(__dirname + '/public/html/home.html');
 });
 
-
-app.get('/api/threads', (req, res) => {
-  getAllThreads((err, threads) => {
-    if (err) return res.status(500).json({ success: false, error: 'Erreur récupération threads' });
-    res.json(threads);
-  });
-});
-
-app.get('/api/threadsids', (req, res) => {
-  getAllThreadIds((err, ids) => {
-    if (err) return res.status(500).json({ error: 'Erreur récupération IDs' });
-    res.json(ids);
-  });
-});
-
-app.get('/api/thread/:id', (req, res) => {
-  const threadId = parseInt(req.params.id);
-  if (isNaN(threadId)) return res.status(400).json({ success: false, error: 'ID invalide' });
-
-  getThreadById(threadId, (err, thread) => {
-    if (err) return res.status(500).json({ success: false, error: 'Erreur récupération thread' });
-    if (!thread) return res.status(404).json({ success: false, error: 'Thread non trouvé' });
-    res.json({ success: true, data: thread });
-  });
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/public/html/index.html');
 });
 
 app.get('/api/threads/filter', (req, res) => {

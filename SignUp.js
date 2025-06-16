@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+    import bcrypt from 'bcrypt';
 import sqlite3 from 'sqlite3';
 
 const db = new sqlite3.Database('./forum.db', sqlite3.OPEN_READWRITE, (err) => {
@@ -125,8 +125,8 @@ const SignUp = {
                     return;
                 }
                 if (row) {
+                    resolve({ exists: true, message: 'Username already exists' });
                     if (row.username === username) {
-                        resolve({ exists: true, message: 'Username already exists' });
                     } else {
                         resolve({ exists: true, message: 'Email already exists' });
                     }
